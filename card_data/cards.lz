@@ -1,0 +1,505 @@
+Pirates / Bandits
+    tp:Event
+	tx:Do they arrive? Were they waiting? What do they want from you?
+
+Police
+    tp:Event
+	tx:Do they arrive? Were they waiting? Did someone call them? Who do they work for?
+
+Clue:2
+    tp:Event
+	tx:Who discovers it? What does it look like? What does it mean? Does it help anyone?
+
+Its a Trap
+    tp:Event
+	tx:Who set it? Who falls for it?
+
+Argument
+    tp:Event
+	tx:Who is arguing? PC/NPC? What about? How loud?
+
+Fight
+    tp:Event
+	tx:Who is fighting? Have you met them before? PC/NPC? 
+
+Long Lost Friend 
+    tp:Event
+	tx:Draw 3 Growth Cards to describe. Who's friend? What are they like? What do they want?
+
+Mysterious Stranger
+    tp:Event
+	tx:Draw 3 Growth cards to describe. Do they want something? How do they show? Can they help you? Might they hurt someone?
+
+Market
+	tp:Event
+	tx:What's for sale? Does anyone you want to speak to come? Is this a specialist market?
+
+Fayre
+	tp:Event
+	tx:What's for sale? Who does this bring together? Could anything go wrong here?
+
+Grand Opening
+	tp:Event	
+	tx:What is being opened? What famous people are coming? Does anyone want to meet them? What undesirables would come to an event like this?
+
+Crime Scene
+	tp:Event
+	tx:Is someone dead? Has something been robbed? Can you offer assistence? To who?
+
+Arrival
+	tp:Event
+	tx:Who arrives? Is it the group, or someone else? Was this expected?
+True Love
+	tp:Goal
+	tx:Do you know to who? If not, how will you know it's real?
+
+Prove Valor
+	tp:Goal
+	tx:To Whom? Why do you care? What is Valor to you?
+
+Regain Acceptance
+	tp:Goal
+	tx: Who's acceptance? Perhaps of a family member or clan? Why did you lose it?
+
+More Power
+	tp:Goal
+	tx:Significantly increase your influence in the world. What is power? How will you use it?
+
+Vengeance
+	tp:Goal
+	tx:Someone has wronged you. Who? How? What will satisfy your need for revenge?
+
+Aquire Artifact
+	tp:Goal
+	tx:What artifact? Where is it kept? Is it on the move? What is it's value to you?
+
+Stolen Hearts
+	tp:Goal
+	tx:Win the romantic affection of at least 3 other characters
+
+Rescue
+	tp:Goal
+	tx:Who needs rescuing? Where are they? How do you know them? Why do you care?
+
+Get Married
+	tp:Goal
+	tx:To anyone in particular? Will anyone do? What are your criteria?
+
+Protector
+	tp:Goal
+	tx:Keep who alive? Why do you care?
+
+Escort
+	tp:Goal
+	tx:Get who safely to where? What do you hope will happen when you get there?
+
+The Best for You
+	tp:Goal
+	tx:The best for someone is not always what they think.  Who do you want the best for? What will you do to help them achieve it?
+
+Take the Throne
+	tp:Goal
+	tx:Take back, or just take? From who? For who? What throne? Does someone need to die? 
+
+Head of the clan
+	tp:Goal
+	tx:Your family/clan is full of quarels and infighting.\nBut if you were leader... 
+
+Make Money
+	tp:Goal
+	tx:How much is enough?\n What will you do with it? Can you buy an Island?
+
+Fame
+	tp:Goal
+	tx:Everyone in the world should know your name. Why? What makes you special? What will you be famous for?
+
+A Quiet Life
+	tp:Goal
+	tx:Out of the bustle, you want to live in peace. What is stopping you? Why do you keep journeying? When will it be complete?
+
+Expose Secret
+	tp:Goal
+	tx:You know someone is hiding something. Who needs to know? How will you prove it?
+
+The Hunt
+	tp:Goal
+	tx:You will track someone, or something down, no matter the cost. What will you do when you catch them? Why do they matter to you?
+
+Crime Scene
+	tp:Scenario
+	tx:What appears to have happened? What are the police doing about it? Who is trying to find out more?
+
+Banquet
+	tp:Scenario
+	tx:Who is throwing this feast? Who was invited? Did anyone significant come? Did anyone significant refuse to come?
+
+
+King Restopat
+	tp:Role
+	Trait:Manipulative	
+	Skill:Strategist
+
+Prince Robert
+	tp:Role
+	Trait:Pacifist
+	Skill:Eloquent
+
+Princess Charmina
+	tp:Role
+	tx:Immune to Persuasion
+	Trait:Rebelious	
+	Skill:Stealth
+
+Ivy Malady
+	tp:Role
+	tx:Handmaid to ??
+	Trait:Honest
+	Skill:Tailor
+
+
+Commander Slimes
+	tp:Role
+	tx:Army Commander
+	Skill:Swordsman
+	Trait:Violent
+
+Ray Storping
+	tp:Role
+	tx:Body Guard
+	Skill:Vigilance
+	Trait:Pessemistic
+
+Snide Rool
+	tp:Role
+	tx:Mechanic
+	Skill:Pilot Anything
+	Trait:Reckless	
+
+Granny Wildersnax
+	tp:Role
+	tx:Grandmother of ??
+	Skill:Came Prepared
+	Trait:Impulsive
+
+Ramble Grenkin
+	tp:Role
+	tx:Traveling Worker
+	Skill:MacGyver
+	Trait:Brave
+
+Styles Malone
+	tp:Role
+	tx:Detective
+	Skill:Deception Detector
+	Trait:Smelly
+
+Goose Rogers
+	tp:Role
+	tx:Pirate Captain/Bandit Leader.
+	Skill:Brawler
+	Trait:Uncaring
+
+Loris McDonson
+	tp:Role
+	tx:Diplomat
+	Skill:Epathic
+	Trait:Secretive
+Secret Meeting:
+    tp:Scenario
+	tx:What year is it? Who has called the meeting? What are you discussing? Where are you meeting?
+
+Boat Trip:
+    tp:Scenario
+	tx:What year is it? Where are you going? Who hired/owns the boat? What kind of boat is it.
+
+Prison Cell
+	tp:Scenario
+	tx:What year is it? What country are you in? Can you see any guards?
+
+Banquet:
+	tp:Scenario
+	tx:What year is it? Who is holding the banquet? What is the occasion?
+Lock Pick
+    tp:Skill
+	tx:Open any door, chest or other lock.
+
+Swordsman
+    tp:Skill
+	tx:You win any fight as long as you have a sword.
+
+Stealth
+    tp:Skill
+	tx:You can go anywhere unnoticed.
+
+Mechanic
+    tp:Skill
+	tx:Can fix anything with moving parts.
+
+Polyglot
+    tp:Skill
+	tx:Can speak to anyone, anywhere.
+
+Persuasive
+    tp:Skill
+	tx:NPCs want to do what you say. You may Coerce other players with 2 Dice to Persuade their PC. 
+
+Dodge
+    tp:Skill
+	tx:Can evade punches, projectiles, and nasty chores.
+
+Barter
+    tp:Skill
+	tx:Trades with NPCs are always in your favour. You may Coerce other players with 1 dice to make lopsided trades with their characters.
+
+Brawler
+    tp:Skill
+	tx:You always come out on top in group fights or hand to hand combat.
+
+Tailor
+    tp:Skill
+	tx:Can dress themselves and anyone else to fit any occasion
+
+Artist
+    tp:Skill
+	tx:Great works of art open all kinds of doors. Copies can be quite persuasive too.
+
+Actor
+    tp:Skill
+	tx:Conman. Take on any role that suits you.
+
+Etiquet:
+    tp:Skill
+	tx:The upper eschalons of society will believe you are one of them. Even if you are not.
+
+Strategist
+    tp:Skill
+	tx:Plans you make involving more than one person are likely to succeed, as long as everyone plays their part.
+
+Medic
+    tp:Skill
+	tx:Can heal any ailment, as long as you can get hold of the needed ingredients/equipment. 
+
+Sniper
+    tp:Skill
+	tx:Projectiles always hit their mark, whatever that mark might be.
+
+MacGyver
+    tp:Skill
+    tx:Can combine any two things into something 
+
+Explosives Expert
+    tp:Skill
+	tx:Can break through anything as long as you don't mind a bit of noise? May need equipment.
+
+Pilot
+    tp:Skill
+    tx:Can drive any vehicle 
+
+Jumper
+    tp:Skill
+    tx:Can make massive and precise leaps
+
+Vigilance
+	tp:Skill
+	tx:Nothing can sneak up on you.
+
+Walking Compass
+	tp:Skill
+	tx:You always know where you are, and the direction you need to go.
+
+Observant
+	tp:Skill
+	tx:You Spot clues everywhere
+
+Perceptive
+	tp:Skill
+	tx:You can spot deceit any where.
+
+Strong
+	tp:Skill
+	tx:You can lift incredibly heavy things, and break others.
+
+Wisdom
+	tp:Skill
+	tx:Your advice always works, and you listen to it yourself.
+
+
+Charming
+    tp:Skill
+	tx:Your silky voice and way with words draw people to love you. Especially good at making friends with old ladies.
+
+Came Prepared
+	tp:Skill
+	tx:Remembered to pack exactly what you'd need. Can produce almost anything from your bag.
+
+Empathic
+    tp:Skill
+	tx:Just looking at someone you can understand their feelings about any issue, and you can feel much of their life story too.
+
+Swimmer
+	tp:Skill
+	tx:You can swim long distances, and quickly. Even upstream is no problem. Up Sewers ... if you want.
+
+Pick Pocket
+	tp:Skill
+	tx:You can take anything from anyone without them noticing. PCs cannot react without giving you two dice.
+
+Speed
+	tp:Skill
+	tx:You can get anywhere quicker than anyone else. You can react fast, to any physical action.
+Manipulative
+    tp:Trait
+	tx:Will always use underhanded or secretive ways to get what they want. Lays on heavy guilt where necessary.
+
+Uncaring
+    tp:Trait
+	tx:Nobody else matters. Nothing moves you.
+
+Proud
+    tp:Trait
+	tx:You are always looking for ways to show superiority to anyone.
+
+Coward
+    tp:Trait
+	tx:You run and hide at the slightest danger.
+
+Loyal to the Cause
+    tp:Trait
+	tx:What cause? What are you willing to sacrifice for it?
+
+Loyal to friends.
+	tp:Trait
+	tx:What makes someone a friend? What shows loyalty? Will you lie for them? Will you rob for them? What will you do?
+
+Brave
+    tp:Trait
+	tx:Nothing Scares you. You rush into danger for almost any reason.
+
+Greedy
+    tp:Trait
+	tx:The sight of gold, or anything else of value can be very distracting. You may forget what you were doing, or why, just to get hold of it.
+
+Impulsive
+    tp:Trait
+	tx:You react quickly, not necessarily smartly. You may Coerce GM with 1 dice to speak/go first.
+
+Measured
+    tp:Trait
+	tx:You react slowly and deliberately. You may Coerce GM with 1 dice to speak/go last. 
+
+Sensitive
+    tp:Trait
+	tx:Aware of everything going on around you, easily affected by it.
+
+Secretive
+    tp:Trait
+	tx:Just because it might be useful to someone to know something doesn't mean you should tell them.
+
+Honest
+    tp:Trait
+	tx:You have no problem telling people anything, as long as it's true. Some people don't like you for it. 
+
+Violent
+    tp:Trait
+	tx:If people are in the way, then fight them.\n if people won't help you, they are the enemy.
+
+Patient
+    tp:Trait
+	tx:You are happy to wait long periods without doing anything.\n For a purpose. You may pass your turn in a safe place or hiding to gain a dice.
+
+Smelly
+    tp:Trait
+	tx:People don't stay talking to you for long, though nobody tells you why.
+
+Talkative
+    tp:Trait
+	tx:There is nothing you will not talk to anyone about. You may miss out on important info, as you were too busy talking.
+
+Compassionate
+    tp:Trait
+	tx:When you see someone in trouble or pain, you must help them. Often forgetting what you were doing, and no matter what it costs you.
+
+Pacifist
+    tp:Trait
+	tx:You want peace, globally, and locally. You will do whatever it takes to stop a fight between others.
+
+Passive Aggressive
+    tp:Trait
+	tx:You never tell people what you want or how they can help you. You only mention things that might be bothersome, and wonder why no one does anything.
+
+Mercenary
+    tp:Trait
+	tx:Can be persuaded to do anything for money.
+
+Short
+    tp:Trait
+	tx:Can go through small places, but can't reach high shelves.
+
+Tall
+    tp:Trait
+	tx:Nothing is out of reach, especially if you can stand on someone else's shoulders.
+
+Spendaholic
+    tp:Trait
+	tx:Buys the best and worst of everything. Loves the feeling of buying new things. Not to be trusted with treasure.
+
+Tight Fisted
+    tp:Trait
+	tx:Eats the cheapest food, doesn't waste money on armour, avoids spending money at all (other) costs.
+
+Generous
+    tp:Trait
+	tx:You cannot see your needs compared to those of others. You love to give what you have to those around you. Not to be trusted with treasure.
+
+Optimist
+    tp:Trait
+	tx:You always believe things will go well, and act like they will, even when the stakes are high
+
+Pessimist
+    tp:Trait
+	tx:You always assume bad things are about to happen. Avoid taking risks. Earn a Token as GM, when the worst possible thing happens.
+
+Kind
+    tp:Trait
+	tx:Kindness is it's own reward. A good thing, as kindness to the wrong people can be very costly.
+
+Cruel
+    tp:Trait
+	tx:You take great delight in seeing people you dislike suffer. You dislike many people. Even your friends are careful to avoid your wrath.
+
+Handsome / Beautiful
+    tp:Trait
+	tx:People admire you wherever you go, and love to help you where they can. But some people might get jealous.
+
+Scary looking
+    tp:Trait
+	tx:People avoid you when they see you. Talking to you makes them uncomfortable. Some even run away, especially children.
+
+
+Bitter
+    tp:Trait
+	tx:Scorned by the world for too long, and wearied by everything. Now its time for the world to be scorned by you.
+
+Gossip:
+	tp:Trait
+	tx:You always talk about people behind their back. Known to accidently reveal important secrets to the wrong people.
+
+Rebel:
+	tp:Trait
+	tx:You never do what you're told. Immune to Coersion.
+
+Promise Keeper:
+	tp:Trait
+	tx:Your word is your bond. If you say you will do something, then you will find a way to do it, no matter the cost.
+
+Trickster
+    tp:Trait
+    tx:To lead people on, to make traps. To get what you want by deception. To test your wits. This is a way of life, and one you love. 
+
+You Dun It
+	tp:Whodunit
+	tx:It was you. You done it. Try to hide it if you like, but you know you did it. Why did you done it? How?
+
+Not You:6
+	tp:Whodunit
+	tx:It wasn't you, It could be any of the other players or someone else. You'll have to work it out.

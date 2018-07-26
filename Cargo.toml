@@ -1,0 +1,12 @@
+[package]
+name = "shoehorn_circle"
+version = "0.1.0"
+authors = ["storyfeet <thebeaky@psmail.net>"]
+
+[dependencies]
+
+card_deck="*"
+lazyf="*"
+enum_derive="*"
+#custom_derive="*"
+macro-attr="*"
