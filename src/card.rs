@@ -4,6 +4,9 @@ use std::path::Path;
 use std::str::FromStr;
 
 
+use self::CardType::*;
+
+
 pub struct Supply{
     pub goals:Deck<Card>,
     pub roles:Deck<Card>,
@@ -18,12 +21,12 @@ impl Supply {
     //creates an empty supply
     pub fn new()->Self{
         Supply{
-            goals:Deck::new(), 
-            roles:Deck::new(), 
-            events:Deck::new(), 
-            scenarios:Deck::new(), 
-            traits:Deck::new(), 
-            skills:Deck::new(), 
+            goals:Deck::build().done(), 
+            roles:Deck::build().done(), 
+            events:Deck::build().done(), 
+            scenarios:Deck::build().done(), 
+            traits:Deck::build().done(), 
+            skills:Deck::build().done(), 
         }
     }
     pub fn load<P:AsRef<Path>>(fname:P)->Result<Supply,String>{
@@ -36,20 +39,22 @@ impl Supply {
             };
             
             match c.kind {
-                Goal=>res.goals.push(c),
-                Role=>res.roles.push(c),
-                Skill=>res.skills.push(c),
-                Trait=>res.traits.push(c),
-                Scenario=>res.scenarios.push(c),
-                Roles=>res.roles.push(c),
+                Goal=>res.goals.push_bottom(c),
+                Role=>res.roles.push_bottom(c),
+                Skill=>res.skills.push_bottom(c),
+                Trait=>res.traits.push_bottom(c),
+                Scenario=>res.scenarios.push_bottom(c),
+                Roles=>res.roles.push_bottom(c),
             }
         }
         Ok(res)
     }
 }
 
+#[derive(Clone,Copy)]//,EnumFromStr)]
 pub enum CardType{
     Goal,
+    Role,
     Trait,
     Skill,
     Event,
@@ -59,10 +64,11 @@ pub enum CardType{
 impl FromStr for CardType{
     type Err = String;
     fn from_str(s:&str)->Result<Self,Self::Err>{
-        match s.to_lower(){
+        use self::CardType::*;
+        match &s.to_lowercase() as &str{
             "goal"=>Ok(Goal),
-            "trait"=>(Trait),
-            r=>Err(Format("Not a Card Type : {}",r)),
+            "trait"=>Ok(Trait),
+            r=>Err(format!("Not a Card Type : {}",r)),
         }
     }
 }
@@ -77,9 +83,12 @@ pub struct Card{
 
 impl Card{
     pub fn from_lz(lz:&Lz)->Result<Card,String>{
-        let kind = lz.get_t::<CardType>("tp")?;
+        let kind = match lz.get_t::<CardType>("tp"){
+            Some(k)=>k,
+            None=>return Err("Kind not found".to_string()),
+        };
         Ok(Card{
-            name:lz.name,
+            name:lz.name.clone(),
             text:lz.get_s_def("tx",""),
             kind:kind,
             cost:lz.get_t_def("Cost",0),
@@ -91,14 +100,16 @@ impl Card{
 
 #[cfg(test)]
 mod tests{
-    use super::Card;
+    use super::{Card,Supply};
     
     #[test]
     fn loader(){
-        let supply = Supply::load("card_data/cards.lz");
+        println!("TESTING LOADER");
+        let supply = Supply::load("card_data/cards.lz").unwrap();
         for c in &supply.goals {
             println!("{}:{}",c.name,c.text);
         }
+        
     }
 
 }

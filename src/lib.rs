@@ -4,6 +4,7 @@ extern crate lazyf;
 #[macro_use] extern crate enum_derive;
 
 pub mod card;
+use card::Card;
 
 
 
