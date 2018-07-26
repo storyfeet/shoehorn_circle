@@ -1,6 +1,7 @@
 use card_deck::Deck;
 use lazyf::{LzList,SGetter,Lz};
 use std::path::Path;
+use std;
 use std::str::FromStr;
 
 
@@ -10,12 +11,12 @@ use self::CardType::*;
 pub struct Supply{
     pub goals:Deck<Card>,
     pub roles:Deck<Card>,
-    pub events:Deck<Card>,
-    pub scenarios:Deck<Card>,
     pub traits:Deck<Card>, 
     pub skills:Deck<Card>,
-
+    pub events:Deck<Card>,
+    pub scenarios:Deck<Card>,
 }
+
 
 impl Supply {
     //creates an empty supply
@@ -43,11 +44,21 @@ impl Supply {
                 Role=>res.roles.push_bottom(c),
                 Skill=>res.skills.push_bottom(c),
                 Trait=>res.traits.push_bottom(c),
+                Event=>res.traits.push_bottom(c),
                 Scenario=>res.scenarios.push_bottom(c),
-                Roles=>res.roles.push_bottom(c),
             }
         }
         Ok(res)
+    }
+
+    pub fn vec_decks<'a>(&'a mut self)->Vec<&'a mut Deck<Card>>{
+        vec![&mut self.goals,&mut self.roles]
+    }
+
+    pub fn shuffle_decks(&mut self){
+        for d in self.vec_decks(){
+            d.shuffle_draw_pile();
+        }
     }
 }
 
@@ -64,10 +75,13 @@ pub enum CardType{
 impl FromStr for CardType{
     type Err = String;
     fn from_str(s:&str)->Result<Self,Self::Err>{
-        use self::CardType::*;
         match &s.to_lowercase() as &str{
             "goal"=>Ok(Goal),
+            "role"=>Ok(Role),
             "trait"=>Ok(Trait),
+            "skill"=>Ok(Skill),
+            "event"=>Ok(Event),
+            "scenario"=>Ok(Scenario),
             r=>Err(format!("Not a Card Type : {}",r)),
         }
     }
@@ -105,10 +119,12 @@ mod tests{
     #[test]
     fn loader(){
         println!("TESTING LOADER");
-        let supply = Supply::load("card_data/cards.lz").unwrap();
+        let mut supply = Supply::load("card_data/cards.lz").unwrap();
+        //supply.shuffle_decks();
         for c in &supply.goals {
             println!("{}:{}",c.name,c.text);
         }
+        assert!(false);
         
     }
 
