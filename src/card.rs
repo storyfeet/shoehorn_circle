@@ -7,7 +7,6 @@ use std::str::FromStr;
 
 use self::CardType::*;
 
-
 pub struct Supply{
     pub goals:Deck<Card>,
     pub roles:Deck<Card>,
@@ -52,7 +51,7 @@ impl Supply {
     }
 
     pub fn vec_decks<'a>(&'a mut self)->Vec<&'a mut Deck<Card>>{
-        vec![&mut self.goals,&mut self.roles]
+        vec![&mut self.goals,&mut self.roles,&mut self.traits,&mut self.skills,&mut self.events, &mut self.scenarios]
     }
 
     pub fn shuffle_decks(&mut self){
@@ -62,7 +61,7 @@ impl Supply {
     }
 }
 
-#[derive(Clone,Copy)]//,EnumFromStr)]
+#[derive(Clone,Copy,Debug,PartialEq)]//,EnumFromStr)]
 pub enum CardType{
     Goal,
     Role,
@@ -87,12 +86,13 @@ impl FromStr for CardType{
     }
 }
 
+#[derive(Clone,Debug,PartialEq)]
 pub struct Card{
-    name:String,
-    text:String,
-    kind:CardType,
-    cost:u8,
-    tokens:u8,
+    pub name:String,
+    pub text:String,
+    pub kind:CardType,
+    pub cost:u8,
+    pub tokens:u8,
 }
 
 impl Card{
@@ -112,6 +112,7 @@ impl Card{
 }
 
 
+
 #[cfg(test)]
 mod tests{
     use super::{Card,Supply};
@@ -120,13 +121,12 @@ mod tests{
     fn loader(){
         println!("TESTING LOADER");
         let mut supply = Supply::load("card_data/cards.lz").unwrap();
-        //supply.shuffle_decks();
+        supply.shuffle_decks();
         for c in &supply.goals {
             println!("{}:{}",c.name,c.text);
         }
-        assert!(false);
-        
+        //TODO work out something to actually test
+//        assert!(false);
     }
-
 }
 

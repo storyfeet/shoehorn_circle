@@ -4,7 +4,10 @@ extern crate lazyf;
 #[macro_use] extern crate enum_derive;
 
 pub mod card;
-use card::Card;
+use card::{Card};
+
+pub mod player;
+use player::{Player};
 
 
 
@@ -25,13 +28,6 @@ pub enum Action{
     Reward(),
 }
 
-pub struct Player{
-    username:String,
-    role:String,
-    cards:Vec<Card>,
-    tokens:u8,
-    dice:u8,
-}
 
 
 
