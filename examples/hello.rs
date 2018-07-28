@@ -1,6 +1,7 @@
-extern crate shoehorn_circle;
-use shoehorn_circle::card::{Supply,Card,CardType};
-use shoehorn_circle::player::Player;
+extern crate shoehorn_circle as shoehorn;
+use shoehorn::card::{Card,CardType};
+use shoehorn::supply::Supply;
+use shoehorn::player::Player;
 
 
 fn main(){

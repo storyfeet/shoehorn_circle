@@ -1,4 +1,5 @@
-use card::{Supply,CardType,Card};
+use card::{CardType,Card};
+use supply::{Supply};
 
 
 #[derive(Debug,Clone)]
@@ -28,13 +29,15 @@ impl Player {
 
 #[cfg(test)]
 mod tests {
-    use card::{Supply,CardType};
+    use card::{CardType};
     use player::Player;
+    use supply::Supply;
 
     #[test]
     fn test_loadfilter(){
         let mut sp = Supply::load("card_data/cards.lz").unwrap();
         let p = Player::new("matt",&mut sp); 
+        assert_eq!(p.cards.len(),11,"{:?}",p);
 
         let mut tot = 0;
         for c in p.cards.iter().filter(|x| x.kind== CardType::Role) {

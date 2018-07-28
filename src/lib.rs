@@ -1,7 +1,10 @@
 extern crate card_deck;
 extern crate lazyf;
-#[macro_use] extern crate macro_attr;
-#[macro_use] extern crate enum_derive;
+//#[macro_use] extern crate macro_attr;
+//#[macro_use] extern crate enum_derive;
+
+pub mod supply;
+use supply::{Supply};
 
 pub mod card;
 use card::{Card};
@@ -25,14 +28,14 @@ pub enum Action{
     Do(BasicAction),
     Say(BasicAction),
     Bid(String,u8),
+    Roll(String),//winner
     Reward(),
 }
-
-
-
 
 pub struct Game{
     players:Vec<Player>,
     actions:Vec<Action>,
+    growth:GrowthRow,
+    supply:Supply,
 }
 
