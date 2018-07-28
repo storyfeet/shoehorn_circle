@@ -1,6 +1,6 @@
 use card::{Card,CardType};
 use card_deck::Deck;
-use lazyf::{LzList,SGetter,Lz};
+use lazyf::{LzList};
 use std::path::Path;
 
 pub struct Supply{
