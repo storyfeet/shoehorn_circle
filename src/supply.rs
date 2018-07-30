@@ -2,6 +2,8 @@ use card::{Card,CardType};
 use card_deck::Deck;
 use lazyf::{LzList};
 use std::path::Path;
+use sc_error::ScErr;
+
 
 pub struct Supply{
     pub goals:Deck<Card>,
@@ -25,7 +27,7 @@ impl Supply {
             skills:Deck::build().done(), 
         }
     }
-    pub fn load<P:AsRef<Path>>(fname:P)->Result<Supply,String>{
+    pub fn load<P:AsRef<Path>>(fname:P)->Result<Supply,ScErr>{
         let lzl = LzList::load(fname)?;
         let mut res = Self::new();
         for lz in lzl.iter() {
@@ -39,7 +41,7 @@ impl Supply {
                 CardType::Role=>res.roles.push_bottom(c),
                 CardType::Skill=>res.skills.push_bottom(c),
                 CardType::Trait=>res.traits.push_bottom(c),
-                CardType::Event=>res.traits.push_bottom(c),
+                CardType::Event=>res.events.push_bottom(c),
                 CardType::Scenario=>res.scenarios.push_bottom(c),
             }
         }

@@ -3,6 +3,9 @@ extern crate lazyf;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
+use std::path::Path;
+
+
 pub mod supply;
 use supply::{Supply,GrowthRow};
 
@@ -15,6 +18,9 @@ use player::{Player};
 pub mod action;
 use action::Action;
 
+pub mod sc_error;
+use sc_error::ScErr;
+
 
 
 
@@ -25,14 +31,14 @@ pub struct RewardInfo{
 
 
 pub struct Game{
-    players:Vec<Player>,
+    pub players:Vec<Player>,
     actions:Vec<Action>,
     growth:GrowthRow,
     supply:Supply,
 }
 
 impl Game{
-    pub fn Build()->GameBuilder{
+    pub fn build()->GameBuilder{
         GameBuilder::new()
     }
 }
@@ -43,6 +49,7 @@ pub struct GameBuilder{
     player_names:Option<Vec<String>>,
     supply:Option<Supply>,
     history:Option<Vec<Action>>,
+    err:Option<ScErr>,
 }
 
 impl GameBuilder{
@@ -53,10 +60,38 @@ impl GameBuilder{
             player_names:None,
             supply:None,
             history:None,
+            err:None,
         }
     }
 
-    pub fn done(mut self)->Game{
+    pub fn supply_file<P:AsRef<Path>>(mut self,fname:P)->Self{
+        match Supply::load(fname){
+            Ok(s)=>self.supply = Some(s),
+            Err(e)=>self.err= Some(e),
+        }
+        self
+    }
+
+    pub fn supply(mut self,sp:Supply)->Self{
+        self.supply=Some(sp);
+        self
+    }
+    
+    pub fn n_players(mut self, n:usize)->Self{
+        self.nplayers = n;
+        self
+    }
+
+    pub fn player_names<IT>(mut self,names:IT)->Self
+        where IT:IntoIterator<Item=String>{
+        self.player_names = Some(names.into_iter().collect());
+        self
+    }
+
+    pub fn done(mut self)->Result<Game,ScErr>{
+        if let Some(e)= self.err {
+            return Err(e);
+        }
         let mut pnames:Vec<String> = match self.player_names{
             Some(n)=>n,
             None=> (0..self.nplayers).map(|i|format!("P{}",i)).collect(),
@@ -64,18 +99,18 @@ impl GameBuilder{
 
         let mut supply = match self.supply{
             Some(sp)=>sp,
-            None=>Supply::load("card_data/cards.lz").expect("could not load cards"),
+            None=>Supply::load("card_data/cards.lz")?,
         };
 
         let mut players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
 
 
-        Game{
+        Ok(Game{
             players:players,
             actions:self.history.unwrap_or(Vec::new()),
             growth:GrowthRow::new(self.g_row_size,&mut supply),
             supply:supply,
-        }
+        })
     }
 }
 

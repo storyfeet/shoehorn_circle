@@ -24,6 +24,7 @@ impl Player {
             dice:8,
         }
     }
+
 }
 
 
