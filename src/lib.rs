@@ -102,6 +102,8 @@ impl GameBuilder{
             None=>Supply::load("card_data/cards.lz")?,
         };
 
+        supply.shuffle_decks();
+
         let mut players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
 
 

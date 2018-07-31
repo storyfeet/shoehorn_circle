@@ -15,8 +15,8 @@ impl Player {
         let mut cards:Vec<Card> = Vec::new(); 
         cards.extend(&mut s.roles.draw(2));
         cards.extend(&mut s.goals.draw(3));
-        cards.extend(&mut s.traits.draw(3));
-        cards.extend(&mut s.skills.draw(3));
+        cards.extend(&mut s.traits.draw(4));
+        cards.extend(&mut s.skills.draw(4));
         Player{
             username:username.to_string(),
             cards:cards,
