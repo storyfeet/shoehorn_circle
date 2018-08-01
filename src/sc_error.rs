@@ -6,6 +6,8 @@ use std::fmt;
 #[derive(Debug)]
 pub enum ScErr{
     NoLoad(String),
+    NoParse(String),
+    None_Err(),
     Other_Err(String),
 }
 
@@ -14,6 +16,7 @@ impl From<String> for ScErr {
         ScErr::Other_Err(s)
     }
 }
+
 
 /*impl<S:AsRef<String>> From<S> for ScErr {
     fn from(s:S)->ScErr{

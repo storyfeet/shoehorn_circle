@@ -43,7 +43,7 @@ mod tests {
         let mut tot = 0;
         for c in p.cards.iter().filter(|x| x.kind== CardType::Role) {
             tot += 1;
-            println!("{}:{}",c.name,c.text);
+//            println!("{}:{}",c.name,c.text);
             for sc in &sp.roles{
                 assert!(c.name != sc.name,"c.name = {}, sc.name= {}",c.name,sc.name);
             }
