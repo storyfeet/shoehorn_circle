@@ -1,4 +1,4 @@
-use card::{CardType,Card};
+use card::{Card};
 use supply::{Supply};
 
 
@@ -38,7 +38,7 @@ mod tests {
     fn test_loadfilter(){
         let mut sp = Supply::load("card_data/cards.lz").unwrap();
         let p = Player::new("matt",&mut sp); 
-        assert_eq!(p.cards.len(),11,"{:?}",p);
+        assert_eq!(p.cards.len(),13,"{:?}",p);
 
         let mut tot = 0;
         for c in p.cards.iter().filter(|x| x.kind== CardType::Role) {

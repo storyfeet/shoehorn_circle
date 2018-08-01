@@ -1,6 +1,7 @@
 use card::Card;
 use std::str::FromStr;
 use sc_error::ScErr;
+use itertools::Itertools;
 
 #[derive(Debug,PartialEq)]
 pub struct Action{
@@ -14,7 +15,7 @@ pub enum ActionType{
     Do(String),
     Say(String),
     FillSupply(Card),
-    Bid(String,u8),
+    Bid(u8),//ndice
     Roll(String),//winner
     WhoDunnit(String),
     Reward(String,String),//Player Card
@@ -41,15 +42,16 @@ impl FromStr for Action{
         match &ss.next()
                 .ok_or(ScErr::NoParse("No Action name".to_string()))?
                 .to_lowercase() as &str{
-            "chat"=>Ok(Action::new(user,
-                                   Chat(
-                                       ss.map(|s| {
-                                           let mut r =" ".to_string();
-                                           r.push_str(s);
-                                           r
-                                       }).collect())
-                                   )
-                       ), 
+            "chat"=>Ok(Action::new(user, Chat( ss.intersperse(" ").collect()))), 
+            "say"=>Ok(Action::new(user,Say(ss.intersperse(" ").collect()))),
+            "do"=>Ok(Action::new(user,Do(ss.intersperse(" ").collect()))),
+            "bid"=>{
+                let n = ss.next()
+                            .ok_or(ScErr::NoParse("need num for parse".to_string()))?
+                                .parse::<u8>()?;
+                Ok(Action::new(user,Bid(n)))
+            }
+
             offlist=>Err(ScErr::NoParse(offlist.to_string())),
 
         }

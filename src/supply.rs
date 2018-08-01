@@ -97,7 +97,7 @@ impl GrowthRow{
 
 #[cfg(test)]
 mod tests{
-    use super::{Card,Supply,GrowthRow};
+    use super::{Supply,GrowthRow};
     
     #[test]
     fn loader(){

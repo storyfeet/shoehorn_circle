@@ -1,7 +1,6 @@
-use std;
 use std::str::FromStr;
 
-use lazyf::{LzList,SGetter,Lz};
+use lazyf::{SGetter,Lz};
 
 use self::CardType::*;
 

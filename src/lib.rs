@@ -1,5 +1,6 @@
 extern crate card_deck;
 extern crate lazyf;
+extern crate itertools;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
@@ -10,7 +11,6 @@ pub mod supply;
 use supply::{Supply,GrowthRow};
 
 pub mod card;
-use card::{Card};
 
 pub mod player;
 use player::{Player};
@@ -21,14 +21,10 @@ use action::Action;
 pub mod sc_error;
 use sc_error::ScErr;
 
-pub mod joiner;
 
 
 
 
-pub struct RewardInfo{
-    name:String,dice:u8,tokens:u8,card:String
-}
 
 
 
@@ -90,11 +86,11 @@ impl GameBuilder{
         self
     }
 
-    pub fn done(mut self)->Result<Game,ScErr>{
+    pub fn done(self)->Result<Game,ScErr>{
         if let Some(e)= self.err {
             return Err(e);
         }
-        let mut pnames:Vec<String> = match self.player_names{
+        let pnames:Vec<String> = match self.player_names{
             Some(n)=>n,
             None=> (0..self.nplayers).map(|i|format!("P{}",i)).collect(),
         };
@@ -106,7 +102,7 @@ impl GameBuilder{
 
         supply.shuffle_decks();
 
-        let mut players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
+        let players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
 
 
         Ok(Game{
