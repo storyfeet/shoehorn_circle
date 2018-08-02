@@ -1,6 +1,7 @@
 extern crate card_deck;
 extern crate lazyf;
 extern crate itertools;
+extern crate bracket_parse;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 

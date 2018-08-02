@@ -3,6 +3,39 @@ use std::str::FromStr;
 use lazyf::{SGetter,Lz};
 
 use self::CardType::*;
+use bracket_parse::Bracket;
+use sc_error::ScErr;
+
+
+#[derive(Debug,PartialEq)]
+pub struct CardKey{//primary key
+    name:String,
+    kind:CardType,
+}
+
+impl CardKey{
+    pub fn new(nm:String,kind:CardType)->CardKey{
+        CardKey{
+            name:nm,
+            kind:kind,
+        }
+    }
+
+    pub fn from_bracket(b:&Bracket)->Result<CardKey,ScErr>{
+        match b {
+            Bracket::Branch(v)=>{
+                match v.len(){
+                    2=>Ok(CardKey{name:v[0].match_str().to_string(),
+                                    kind:v[1].match_str().parse()?}),
+                    _=>Err(ScErr::NoParse("Not enough args".to_string())),
+                }
+            },
+            _=>Err(ScErr::NoParse("Card Key not Bracker::Branch".to_string())),
+        }
+    }
+}
+
+
 
 
 #[derive(Clone,Copy,Debug,PartialEq)]//,EnumFromStr)]

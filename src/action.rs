@@ -1,29 +1,38 @@
-use card::Card;
+use card::CardKey;
 use std::str::FromStr;
 use sc_error::ScErr;
-use itertools::Itertools;
+//use itertools::Itertools;
+use bracket_parse::Bracket;
 
-#[derive(Debug,PartialEq)]
-pub struct Action{
-    player_name:String,
-    does:ActionType,
+
+pub enum Action{
+    Pl(PlAction),
+    FillSupply(CardKey),
+    Roll(String),//winner
+    WhoDunnitIs(String), 
 }
 
+
 #[derive(Debug,PartialEq)]
-pub enum ActionType{
+pub struct PlAction{
+    player_name:String,
+    does:PlActionType,
+}
+
+
+#[derive(Debug,PartialEq)]
+pub enum PlActionType{
     Chat(String),
     Do(String),
     Say(String),
-    FillSupply(Card),
     Bid(u8),//ndice
-    Roll(String),//winner
-    WhoDunnit(String),
-    Reward(String,String),//Player Card
+    WhoDunnit(String),//Text for what they done
+    Reward(String,CardKey),//Player Card
 }
 
-impl Action{
-    pub fn new(nm:&str,a:ActionType)->Self{
-        Action{
+impl PlAction{
+    pub fn new(nm:&str,a:PlActionType)->Self{
+        PlAction{
             player_name:nm.to_string(),
             does:a,
         }
@@ -33,27 +42,28 @@ impl Action{
     
 
 
-impl FromStr for Action{
+impl FromStr for PlAction{
     type Err = ScErr;
     fn from_str(s:&str)->Result<Self,Self::Err>{
-        use self::ActionType::*;
-        let mut ss = s.split(" ");
-        let user = ss.next().expect("A Split string should always have one elem");
-        match &ss.next()
-                .ok_or(ScErr::NoParse("No Action name".to_string()))?
-                .to_lowercase() as &str{
-            "chat"=>Ok(Action::new(user, Chat( ss.intersperse(" ").collect()))), 
-            "say"=>Ok(Action::new(user,Say(ss.intersperse(" ").collect()))),
-            "do"=>Ok(Action::new(user,Do(ss.intersperse(" ").collect()))),
-            "bid"=>{
-                let n = ss.next()
-                            .ok_or(ScErr::NoParse("need num for parse".to_string()))?
-                                .parse::<u8>()?;
-                Ok(Action::new(user,Bid(n)))
-            }
+        use self::PlActionType::*;
+        let brack:Bracket = s.parse()?;
 
-            offlist=>Err(ScErr::NoParse(offlist.to_string())),
+        let username = match brack.head() {
+            Bracket::Leaf(ref s)=>s.to_string(),
+            _=>return Err(ScErr::NoParse("No name supplied".to_string())),
+        };
+        let t2= brack.tail();
+        let t3= t2.tail();
 
+        match &t2.head().match_str().to_lowercase() as &str{
+            "chat"=>Ok(PlAction::new(&username, Chat(t3.head().match_str().to_string()))), 
+            "say"=>Ok(PlAction::new(&username, Say(t3.head().match_str().to_string()))), 
+            "do"=>Ok(PlAction::new(&username, Do(t3.head().match_str().to_string()))), 
+            "whodunnit"=>
+                Ok(PlAction::new(&username, WhoDunnit(t3.head()
+                                     .match_str().to_string()))), 
+            "bid"=>Ok(PlAction::new(&username,Bid(t3.head().match_str().parse()?))),
+            offlist=>Err(ScErr::NoParse(format!("Off List {}",offlist))),
         }
     }
 }
@@ -63,9 +73,11 @@ impl FromStr for Action{
 mod Tests{
     use super::*;
     #[test]
-    fn test_create(){
-        use self::ActionType::*;
-        assert_eq!(Action::from_str("Matt Chat hello everybody").unwrap(),Action::new("Matt",Chat("hello everybody".to_string())));
+    fn action_create(){
+        use self::PlActionType::*;
+        assert_eq!(PlAction::from_str("Matt Chat \"hello everybody\"").unwrap(),PlAction::new("Matt",Chat("hello everybody".to_string())));
+        
+        assert_eq!(PlAction::from_str("Matt Bid 4").unwrap(),PlAction::new("Matt",Bid(4)));
     }
 }
 
