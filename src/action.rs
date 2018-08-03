@@ -52,17 +52,20 @@ impl FromStr for PlAction{
             Bracket::Leaf(ref s)=>s.to_string(),
             _=>return Err(ScErr::NoParse("No name supplied".to_string())),
         };
-        let t2= brack.tail();
-        let t3= t2.tail();
+        let h2 = brack.tail_h(1);
+        let h3= brack.tail_h(2);
 
-        match &t2.head().match_str().to_lowercase() as &str{
-            "chat"=>Ok(PlAction::new(&username, Chat(t3.head().match_str().to_string()))), 
-            "say"=>Ok(PlAction::new(&username, Say(t3.head().match_str().to_string()))), 
-            "do"=>Ok(PlAction::new(&username, Do(t3.head().match_str().to_string()))), 
+        match &h2.match_str().to_lowercase() as &str{
+            "chat"=>
+                Ok(PlAction::new(&username, Chat(h3.string_val()))), 
+            "say"=>
+                Ok(PlAction::new(&username, Say(h3.string_val()))), 
+            "do"=>
+                Ok(PlAction::new(&username, Do(h3.string_val()))), 
             "whodunnit"=>
-                Ok(PlAction::new(&username, WhoDunnit(t3.head()
-                                     .match_str().to_string()))), 
-            "bid"=>Ok(PlAction::new(&username,Bid(t3.head().match_str().parse()?))),
+                Ok(PlAction::new(&username, WhoDunnit(h3.string_val()))),
+            "bid"=>
+                Ok(PlAction::new(&username,Bid(h3.match_str().string_val()?))),
             offlist=>Err(ScErr::NoParse(format!("Off List {}",offlist))),
         }
     }

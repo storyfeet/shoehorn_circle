@@ -11,4 +11,4 @@ enum_derive="*"
 #custom_derive="*"
 macro-attr="*"
 itertools="*"
-bracket_parse="*"
+bracket_parse={path="../../mlibs/bracket_parse/"}
