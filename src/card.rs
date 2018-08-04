@@ -7,7 +7,7 @@ use bracket_parse::Bracket;
 use sc_error::ScErr;
 
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct CardKey{//primary key
     name:String,
     kind:CardType,

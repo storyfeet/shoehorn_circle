@@ -17,7 +17,7 @@ pub mod player;
 use player::{Player};
 
 pub mod action;
-use action::Action;
+use action::{Action,PlAction,PlActionType};
 
 pub mod sc_error;
 use sc_error::ScErr;
@@ -39,6 +39,29 @@ pub struct Game{
 impl Game{
     pub fn build()->GameBuilder{
         GameBuilder::new()
+    }
+
+    pub fn player_action(&mut self,ac:PlAction){
+        use PlActionType::*;
+        match ac.act{
+            Chat(_)|Do(_)|Say(_)=>{self.actions.push(Action::Pl(ac))},
+            Bid(_)=>{
+                self.actions.push(Action::Pl(ac));
+                self.roll_bids();
+            }
+            _=>{} 
+        }
+    }
+
+    fn roll_bids(&mut self){
+
+    }
+
+    pub fn since<'a>(&'a self, mut n:usize)->&'a [Action]{
+        if n > self.actions.len(){
+            n = self.actions.len()
+        }
+        &self.actions[n..]
     }
 }
 
@@ -113,5 +136,27 @@ impl GameBuilder{
             supply:supply,
         })
     }
+
 }
 
+
+#[cfg(test)]
+mod test{
+    use ::*;
+    #[test]
+    fn gm_since(){
+        let mut gm = Game::build().done().unwrap();
+
+        for i in 0..4 {
+            gm.player_action(PlAction::new("p1",PlActionType::Chat(format!("This action {}",i))));
+        }
+        assert_eq!(gm.since(0).len(),4);
+
+        assert_eq!(gm.since(3).len(),1);
+        assert_eq!(gm.since(4),&[]);
+        assert_eq!(gm.since(5),&[]);
+        assert_eq!(gm.since(10),&[]);
+
+        
+    }
+}

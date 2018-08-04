@@ -5,6 +5,7 @@ use sc_error::ScErr;
 use bracket_parse::Bracket;
 
 
+#[derive(Debug,PartialEq)]
 pub enum Action{
     Pl(PlAction),
     FillSupply(CardKey),
@@ -15,12 +16,12 @@ pub enum Action{
 
 #[derive(Debug,PartialEq)]
 pub struct PlAction{
-    player_name:String,
-    does:PlActionType,
+    pub player_name:String,
+    pub act:PlActionType,
 }
 
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum PlActionType{
     Chat(String),
     Do(String),
@@ -28,13 +29,14 @@ pub enum PlActionType{
     Bid(u8),//ndice
     WhoDunnit(String),//Text for what they done
     Reward(String,CardKey),//Player Card
+    BuyGrowth(CardKey),
 }
 
 impl PlAction{
     pub fn new(nm:&str,a:PlActionType)->Self{
         PlAction{
             player_name:nm.to_string(),
-            does:a,
+            act:a,
         }
     }
 }
@@ -65,7 +67,7 @@ impl FromStr for PlAction{
             "whodunnit"=>
                 Ok(PlAction::new(&username, WhoDunnit(h3.string_val()))),
             "bid"=>
-                Ok(PlAction::new(&username,Bid(h3.match_str().string_val()?))),
+                Ok(PlAction::new(&username,Bid(h3.string_val().parse()?))),
             offlist=>Err(ScErr::NoParse(format!("Off List {}",offlist))),
         }
     }
@@ -73,7 +75,7 @@ impl FromStr for PlAction{
 
 
 #[cfg(test)]
-mod Tests{
+mod tests{
     use super::*;
     #[test]
     fn action_create(){

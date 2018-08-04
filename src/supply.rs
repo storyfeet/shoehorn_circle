@@ -36,16 +36,20 @@ impl Supply {
                 _=>continue,
             };
             
-            match c.kind {
-                CardType::Goal=>res.goals.push_bottom(c),
-                CardType::Role=>res.roles.push_bottom(c),
-                CardType::Skill=>res.skills.push_bottom(c),
-                CardType::Trait=>res.traits.push_bottom(c),
-                CardType::Event=>res.events.push_bottom(c),
-                CardType::Scenario=>res.scenarios.push_bottom(c),
-            }
+            res.deck_by_type(c.kind).push_bottom(c);
         }
         Ok(res)
+    }
+
+    pub fn deck_by_type<'a>(&'a mut self,kind:CardType)->&'a mut Deck<Card>{
+        match kind {
+            CardType::Goal=>&mut self.goals,
+            CardType::Role=>&mut self.roles,
+            CardType::Skill=>&mut self.skills,
+            CardType::Trait=>&mut self.traits,
+            CardType::Event=>&mut self.events,
+            CardType::Scenario=>&mut self.scenarios,
+        }
     }
 
     pub fn vec_decks<'a>(&'a mut self)->Vec<&'a mut Deck<Card>>{
