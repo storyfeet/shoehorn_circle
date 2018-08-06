@@ -2,6 +2,7 @@ extern crate card_deck;
 extern crate lazyf;
 extern crate itertools;
 extern crate bracket_parse;
+extern crate rand;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
@@ -12,6 +13,7 @@ pub mod supply;
 use supply::{Supply,GrowthRow};
 
 pub mod card;
+//use card::CardType;
 
 pub mod player;
 use player::{Player};
@@ -22,7 +24,7 @@ use action::{Action,PlAction,PlActionType};
 pub mod sc_error;
 use sc_error::ScErr;
 
-
+use rand::{Rng,thread_rng};
 
 
 
@@ -41,8 +43,16 @@ impl Game{
         GameBuilder::new()
     }
 
+    pub fn player_num(&self, name:&str)->Option<usize>{
+        self.players.iter().enumerate().find(|(_,p)|p.name==name).map(|(i,_)|i)
+    }
+
     pub fn player_action(&mut self,ac:PlAction){
         use PlActionType::*;
+        if self.player_num(&ac.player_name).is_none(){
+            return
+        }
+        
         match ac.act{
             Chat(_)|Do(_)|Say(_)=>{self.actions.push(Action::Pl(ac))},
             Bid(_)=>{
@@ -53,8 +63,53 @@ impl Game{
         }
     }
 
-    fn roll_bids(&mut self){
 
+    fn roll_bids(&mut self){ 
+        let mut bids:Vec<Option<u16>> = Vec::new();
+        for _ in 0..self.players.len(){
+            bids.push(None);
+        }
+        
+        for ac in &self.actions { //Could be more efficient, will do for now
+            match ac {
+                Action::Pl(PlAction{player_name:ref pname,act:PlActionType::Bid(n)})=>{
+                    let pnum = self.player_num(pname).expect("Player name checked already!!!");
+                    bids[pnum] = Some(*n as u16);
+                },
+                Action::Roll(_,_)=>{
+                    for b in &mut bids { *b = None; }
+                },
+                _=>{},
+            }
+        }
+
+        let mut rolls =Vec::new();
+        let mut maxn = 0;
+        let mut maxp:Option<usize> = None;//None = tie
+        while maxp == None {
+            rolls= Vec::new();
+            for (pn, b) in (&mut bids).into_iter().enumerate(){
+                match b{
+                    Some(n)=>{
+                        let mut r = 0;
+                        for _ in 0..*n{
+                            r += thread_rng().gen_range(0,6);
+                        }
+                        if r == maxn {
+                            maxp = None;
+                        }
+                        if r > maxn {
+                            maxn = r;
+                            maxp = Some(pn);
+                        }
+                        rolls.push(r);
+                    }
+                    _=>return,
+                }//match
+            }//for 
+        } //tie
+        
+        self.actions.push(Action::Roll(self.players[maxp.unwrap()].name.clone(),rolls));
     }
 
     pub fn since<'a>(&'a self, mut n:usize)->&'a [Action]{
@@ -148,15 +203,15 @@ mod test{
         let mut gm = Game::build().done().unwrap();
 
         for i in 0..4 {
-            gm.player_action(PlAction::new("p1",PlActionType::Chat(format!("This action {}",i))));
+            gm.player_action(PlAction::new("P1",PlActionType::Chat(format!("This action {}",i))));
         }
+        assert_eq!(gm.players[0].name , "P0");
         assert_eq!(gm.since(0).len(),4);
 
         assert_eq!(gm.since(3).len(),1);
         assert_eq!(gm.since(4),&[]);
         assert_eq!(gm.since(5),&[]);
         assert_eq!(gm.since(10),&[]);
-
-        
     }
+
 }

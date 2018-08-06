@@ -7,6 +7,7 @@ authors = ["storyfeet <thebeaky@psmail.net>"]
 
 card_deck="*"
 lazyf="*"
+rand = "*"
 enum_derive="*"
 #custom_derive="*"
 macro-attr="*"

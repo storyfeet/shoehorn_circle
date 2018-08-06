@@ -5,11 +5,13 @@ use sc_error::ScErr;
 use bracket_parse::Bracket;
 
 
+
+
 #[derive(Debug,PartialEq)]
 pub enum Action{
     Pl(PlAction),
     FillSupply(CardKey),
-    Roll(String),//winner
+    Roll(String,Vec<u32>),//winner , Rolls
     WhoDunnitIs(String), 
 }
 

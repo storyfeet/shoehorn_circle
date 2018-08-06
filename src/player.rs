@@ -1,28 +1,32 @@
-use card::{Card};
+use card::{Card,CardType};
 use supply::{Supply};
 
 
 #[derive(Debug,Clone)]
 pub struct Player{
-    pub username:String,
+    pub name:String,
     pub cards:Vec<Card>,
     tokens:u8,
     dice:u8,
 }
 
 impl Player { 
-    pub fn new(username:&str,s:&mut Supply)->Player{
+    pub fn new(name:&str,s:&mut Supply)->Player{
         let mut cards:Vec<Card> = Vec::new(); 
         cards.extend(&mut s.roles.draw(2));
         cards.extend(&mut s.goals.draw(3));
         cards.extend(&mut s.traits.draw(4));
         cards.extend(&mut s.skills.draw(4));
         Player{
-            username:username.to_string(),
+            name:name.to_string(),
             cards:cards,
             tokens:0,
             dice:8,
         }
+    }
+
+    pub fn role(&self)->&str{
+        self.cards.iter().find(|c|c.kind == CardType::Role).map(|c|&c.name as &str).unwrap_or("NO-ROLE")
     }
 
 }

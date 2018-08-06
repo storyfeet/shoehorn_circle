@@ -15,7 +15,7 @@ fn main(){
 
     for p in &mut gm.players {
 
-        println!("{}:" ,p.username);
+        println!("{}:" ,p.name);
         let mut s = String::new();
         stdin.read_line(&mut s).expect("Could not read Line");
         for c in &p.cards {
