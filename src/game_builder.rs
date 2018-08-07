@@ -67,11 +67,13 @@ impl GameBuilder{
 
         let players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
 
+        let mut actions = self.history.unwrap_or(Vec::new());
+        let g_row = GrowthRow::new(self.g_row_size,&mut supply,&mut actions);
 
         Ok(Game{
             players:players,
-            actions:self.history.unwrap_or(Vec::new()),
-            growth:GrowthRow::new(self.g_row_size,&mut supply),
+            actions:actions,
+            growth:g_row,
             supply:supply,
         })
     }

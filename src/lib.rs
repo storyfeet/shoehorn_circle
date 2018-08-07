@@ -59,6 +59,13 @@ impl Game{
                 self.actions.push(Action::Pl(ac));
                 self.roll_bids();
             }
+            WhoDunnit(s)=>{
+                if !self.is_gm(&ac.player_name) {
+                    return;
+                }
+                let dunnit = thread_rng().gen_range(0,self.players.len()+1);
+                self.actions.push(Action::WhoDunnitIs(dunnit,s));
+            }
             _=>{} 
         }
     }
@@ -127,6 +134,13 @@ impl Game{
             }
         }
         None
+    }
+
+    pub fn is_gm(&self,nm: &str)->bool{
+        match self.curr_gm(){
+            Some(s)=>s == nm,
+            _=>false,
+        }
     }
 }
 

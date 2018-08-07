@@ -12,7 +12,7 @@ pub enum Action{
     Pl(PlAction),
     FillSupply(CardKey),
     Roll(String,Vec<u32>),//winner , Rolls
-    WhoDunnitIs(String), 
+    WhoDunnitIs(usize,String), //dunnit playernum , What done
 }
 
 

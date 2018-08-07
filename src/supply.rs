@@ -3,6 +3,7 @@ use card_deck::Deck;
 use lazyf::{LzList};
 use std::path::Path;
 use sc_error::ScErr;
+use action::Action;
 
 
 pub struct Supply{
@@ -72,7 +73,7 @@ pub struct GrowthRow{
 }
 
 impl GrowthRow{
-    pub fn new(per_row:usize,sp:&mut Supply)->GrowthRow{
+    pub fn new(per_row:usize,sp:&mut Supply,ac:&mut Vec<Action>)->GrowthRow{
         let mut res = GrowthRow{
             per_row:per_row,
             skills:Vec::new(),
@@ -114,7 +115,7 @@ mod tests{
         //TODO work out something to actually test
 //        assert!(false);
 //
-        let grow = GrowthRow::new(3,&mut supply);
+        let grow = GrowthRow::new(3,&mut supply,&mut Vec::new());
     
         assert_eq!(grow.skills.len(),3);
     }
