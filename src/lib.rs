@@ -24,10 +24,10 @@ use action::{Action,PlAction,PlActionType};
 pub mod sc_error;
 use sc_error::ScErr;
 
+mod game_builder;
+use game_builder::GameBuilder;
+
 use rand::{Rng,thread_rng};
-
-
-
 
 
 
@@ -118,86 +118,30 @@ impl Game{
         }
         &self.actions[n..]
     }
+
+    pub fn curr_gm<'a>(&'a self)->Option<&'a str>{
+        let mut it = self.actions.iter();
+        while let Some(n) =  it.next_back() {
+            if let Action::Roll(ref w,_) = n {
+                return Some(w)
+            }
+        }
+        None
+    }
 }
 
-pub struct GameBuilder{
-    nplayers:usize,
-    g_row_size:usize,
-    player_names:Option<Vec<String>>,
-    supply:Option<Supply>,
-    history:Option<Vec<Action>>,
-    err:Option<ScErr>,
-}
-
-impl GameBuilder{
-    pub fn new()->GameBuilder{
-        GameBuilder{
-            g_row_size:3,
-            nplayers:4,
-            player_names:None,
-            supply:None,
-            history:None,
-            err:None,
-        }
-    }
-
-    pub fn supply_file<P:AsRef<Path>>(mut self,fname:P)->Self{
-        match Supply::load(fname){
-            Ok(s)=>self.supply = Some(s),
-            Err(e)=>self.err= Some(e),
-        }
-        self
-    }
-
-    pub fn supply(mut self,sp:Supply)->Self{
-        self.supply=Some(sp);
-        self
-    }
-    
-    pub fn n_players(mut self, n:usize)->Self{
-        self.nplayers = n;
-        self
-    }
-
-    pub fn player_names<IT>(mut self,names:IT)->Self
-        where IT:IntoIterator<Item=String>{
-        self.player_names = Some(names.into_iter().collect());
-        self
-    }
-
-    pub fn done(self)->Result<Game,ScErr>{
-        if let Some(e)= self.err {
-            return Err(e);
-        }
-        let pnames:Vec<String> = match self.player_names{
-            Some(n)=>n,
-            None=> (0..self.nplayers).map(|i|format!("P{}",i)).collect(),
-        };
-
-        let mut supply = match self.supply{
-            Some(sp)=>sp,
-            None=>Supply::load("card_data/cards.lz")?,
-        };
-
-        supply.shuffle_decks();
-
-        let players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
-
-
-        Ok(Game{
-            players:players,
-            actions:self.history.unwrap_or(Vec::new()),
-            growth:GrowthRow::new(self.g_row_size,&mut supply),
-            supply:supply,
-        })
-    }
-
-}
 
 
 #[cfg(test)]
 mod test{
     use ::*;
+    
+    //test util
+    fn pname(n:usize)->String{
+        format!("P{}",n)
+    }
+
+
     #[test]
     fn gm_since(){
         let mut gm = Game::build().done().unwrap();
@@ -212,6 +156,25 @@ mod test{
         assert_eq!(gm.since(4),&[]);
         assert_eq!(gm.since(5),&[]);
         assert_eq!(gm.since(10),&[]);
+    }
+
+    #[test]
+    fn rolls_correct(){
+        let mut gm =Game::build().done().unwrap();
+
+        for i in 0 .. 4 {
+            gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(2)));
+        }
+        assert_eq!(gm.actions.len(),5);
+
+        gm.player_action(PlAction::new(&pname(0),PlActionType::Bid(7)));
+        assert_eq!(gm.actions.len(),6);
+        for i in 1 .. 4 {
+            gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(1)));
+        }
+        assert_eq!(gm.actions.len(),10);
+
+        assert_eq!(gm.curr_gm(),Some("P0"));
     }
 
 }
