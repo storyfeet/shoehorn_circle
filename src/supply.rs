@@ -3,7 +3,8 @@ use card_deck::Deck;
 use lazyf::{LzList};
 use std::path::Path;
 use sc_error::ScErr;
-use action::Action;
+use action::{Action};
+use std;
 
 
 pub struct Supply{
@@ -13,6 +14,7 @@ pub struct Supply{
     pub skills:Deck<Card>,
     pub events:Deck<Card>,
     pub scenarios:Deck<Card>,
+    pub growth:Vec<Card>,
 }
 
 
@@ -26,6 +28,7 @@ impl Supply {
             scenarios:Deck::build().done(), 
             traits:Deck::build().done(), 
             skills:Deck::build().done(), 
+            growth:Vec::new(),
         }
     }
     pub fn load<P:AsRef<Path>>(fname:P)->Result<Supply,ScErr>{
@@ -62,47 +65,33 @@ impl Supply {
             d.shuffle_draw_pile();
         }
     }
-}
 
-#[derive(Debug,Clone)]
-pub struct GrowthRow{
-    per_row:usize,  
-    pub skills:Vec<Card>,
-    pub traits:Vec<Card>,
-    pub goals:Vec<Card>,
-}
+    pub fn discard(&mut self,c:Card){
+        self.deck_by_type(c.kind).put_discard(c);
+    }
 
-impl GrowthRow{
-    pub fn new(per_row:usize,sp:&mut Supply,ac:&mut Vec<Action>)->GrowthRow{
-        let mut res = GrowthRow{
-            per_row:per_row,
-            skills:Vec::new(),
-            traits:Vec::new(),
-            goals:Vec::new(),
-        };
-        res.topup(sp);
+    pub fn setup_growth(&mut self, per_row:usize)->Vec<Action>{
+
+        for kind in [CardType::Skill,CardType::Trait,CardType::Goal].into_iter(){
+            let mut dr:Option<Vec<Card>> = None;
+            {
+                dr = Some(self.deck_by_type(*kind).draw(per_row).collect());
+            }
+            self.growth.extend(dr.unwrap());
+        }
+
+        let mut res = Vec::new(); 
+        for c in &self.growth{
+            res.push(Action::FillGrowth(c.into())); 
+        }
         res
     }
 
-    pub fn topup(&mut self,sp:&mut Supply){
-        let d_up = self.per_row - self.skills.len();
-        if d_up > 0 {
-            self.skills.extend(&mut sp.skills.draw(d_up));
-        }
-        let d_up = self.per_row - self.traits.len();
-        if d_up > 0 {
-            self.traits.extend(&mut sp.skills.draw(d_up));
-        }
-        let d_up = self.per_row - self.goals.len();
-        if d_up > 0 {
-            self.goals.extend(&mut sp.goals.draw(d_up));
-        }
-    }
 }
 
 #[cfg(test)]
 mod tests{
-    use super::{Supply,GrowthRow};
+    use super::{Supply};
     
     #[test]
     fn loader(){
@@ -115,9 +104,9 @@ mod tests{
         //TODO work out something to actually test
 //        assert!(false);
 //
-        let grow = GrowthRow::new(3,&mut supply,&mut Vec::new());
+        supply.setup_growth(3);
     
-        assert_eq!(grow.skills.len(),3);
+        assert_eq!(supply.growth.len(),9);
     }
 }
 

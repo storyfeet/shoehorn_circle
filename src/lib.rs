@@ -10,7 +10,7 @@ use std::path::Path;
 
 
 pub mod supply;
-use supply::{Supply,GrowthRow};
+use supply::{Supply};
 
 pub mod card;
 //use card::CardType;
@@ -34,7 +34,6 @@ use rand::{Rng,thread_rng};
 pub struct Game{
     pub players:Vec<Player>,
     actions:Vec<Action>,
-    growth:GrowthRow,
     supply:Supply,
 }
 
@@ -45,6 +44,11 @@ impl Game{
 
     pub fn player_num(&self, name:&str)->Option<usize>{
         self.players.iter().enumerate().find(|(_,p)|p.name==name).map(|(i,_)|i)
+    }
+
+    pub fn player<'a>(&'a mut self,name:&str)->Option<&'a mut Player>{
+        let pnum = self.player_num(name)?;
+        Some(&mut self.players[pnum])
     }
 
     pub fn player_action(&mut self,ac:PlAction){
@@ -66,8 +70,24 @@ impl Game{
                 let dunnit = thread_rng().gen_range(0,self.players.len()+1);
                 self.actions.push(Action::WhoDunnitIs(dunnit,s));
             }
+            BuyGrowth(s)=>{
+                
+            }
             _=>{} 
         }
+    }
+    
+
+    fn run_history(&mut self)->Result<(),ScErr>{
+        use action::Action::*;
+        for a in &self.actions {
+            match a {
+                FillGrowth(ref ck)=>{},//TODO};
+                _=>{},//TODO
+            }
+
+        }
+        Ok(())
     }
 
 
@@ -164,12 +184,12 @@ mod test{
             gm.player_action(PlAction::new("P1",PlActionType::Chat(format!("This action {}",i))));
         }
         assert_eq!(gm.players[0].name , "P0");
-        assert_eq!(gm.since(0).len(),4);
+        assert_eq!(gm.since(0).len(),13);//9 growthrow fill actions included
 
-        assert_eq!(gm.since(3).len(),1);
-        assert_eq!(gm.since(4),&[]);
-        assert_eq!(gm.since(5),&[]);
-        assert_eq!(gm.since(10),&[]);
+        assert_eq!(gm.since(12).len(),1);
+        assert_eq!(gm.since(13),&[]);
+        assert_eq!(gm.since(14),&[]);
+        assert_eq!(gm.since(20),&[]);
     }
 
     #[test]
@@ -179,14 +199,14 @@ mod test{
         for i in 0 .. 4 {
             gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(2)));
         }
-        assert_eq!(gm.actions.len(),5);
+        assert_eq!(gm.actions.len(),14);
 
         gm.player_action(PlAction::new(&pname(0),PlActionType::Bid(7)));
-        assert_eq!(gm.actions.len(),6);
+        assert_eq!(gm.actions.len(),15);
         for i in 1 .. 4 {
             gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(1)));
         }
-        assert_eq!(gm.actions.len(),10);
+        assert_eq!(gm.actions.len(),19);
 
         assert_eq!(gm.curr_gm(),Some("P0"));
     }

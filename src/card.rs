@@ -14,9 +14,9 @@ pub struct CardKey{//primary key
 }
 
 impl CardKey{
-    pub fn new(nm:String,kind:CardType)->CardKey{
+    pub fn new(nm:&str,kind:CardType)->CardKey{
         CardKey{
-            name:nm,
+            name:nm.to_string(),
             kind:kind,
         }
     }
@@ -32,6 +32,31 @@ impl CardKey{
             },
             _=>Err(ScErr::NoParse("Card Key not Bracker::Branch".to_string())),
         }
+    }
+}
+
+impl<'a> From<&'a Card> for CardKey{
+    fn from(c:&Card)->CardKey{
+        CardKey::new(&c.name,c.kind)
+    }
+}
+
+
+impl PartialEq<Card>for CardKey{
+    /// ```
+    /// use shoehorn_circle::card::{Card,CardKey,CardType};
+    /// let c = Card::new("Pig","some text",CardType::Role,2);
+    /// let ck = CardKey::new("Pig",CardType::Role);
+    /// assert_eq!(ck,c);
+    /// assert_eq!(c,ck);
+    /// ```
+    fn eq(&self,c:&Card)->bool{
+        self.name == c.name && self.kind == c.kind
+    }
+}
+impl PartialEq<CardKey>for Card{
+    fn eq(&self,c:&CardKey)->bool{
+        self.name == c.name && self.kind == c.kind
     }
 }
 
@@ -73,6 +98,15 @@ pub struct Card{
 }
 
 impl Card{
+    pub fn new(name:&str,tx:&str,kind:CardType,cost:u8)->Card{
+        Card{
+            name:name.to_string(),
+            text:tx.to_string(),
+            kind:kind,
+            cost:cost,
+            tokens:0,
+        }
+    }
     pub fn from_lz(lz:&Lz)->Result<Card,String>{
         let kind = match lz.get_t::<CardType>("tp"){
             Some(k)=>k,

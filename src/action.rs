@@ -10,7 +10,8 @@ use bracket_parse::Bracket;
 #[derive(Debug,PartialEq)]
 pub enum Action{
     Pl(PlAction),
-    FillSupply(CardKey),
+    FillGrowth(CardKey),
+    BuyGrowth(usize,CardKey,CardKey),//playernum, bought, topup
     Roll(String,Vec<u32>),//winner , Rolls
     WhoDunnitIs(usize,String), //dunnit playernum , What done
 }

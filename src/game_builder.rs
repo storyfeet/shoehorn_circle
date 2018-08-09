@@ -1,4 +1,4 @@
-use ::{Game,Supply,Player,GrowthRow,Action,ScErr};
+use ::{Game,Supply,Player,Action,ScErr};
 
 use std::path::Path;
 
@@ -67,15 +67,19 @@ impl GameBuilder{
 
         let players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
 
-        let mut actions = self.history.unwrap_or(Vec::new());
-        let g_row = GrowthRow::new(self.g_row_size,&mut supply,&mut actions);
+        let actions = self.history.unwrap_or(supply.setup_growth(3));
 
-        Ok(Game{
+        let mut res = Game{
             players:players,
             actions:actions,
-            growth:g_row,
             supply:supply,
-        })
+        };
+
+        if res.actions.len() > 9{
+            res.run_history();
+        }
+
+        Ok(res)
     }
 
 }
