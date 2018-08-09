@@ -73,11 +73,8 @@ impl Supply {
     pub fn setup_growth(&mut self, per_row:usize)->Vec<Action>{
 
         for kind in [CardType::Skill,CardType::Trait,CardType::Goal].into_iter(){
-            let mut dr:Option<Vec<Card>> = None;
-            {
-                dr = Some(self.deck_by_type(*kind).draw(per_row).collect());
-            }
-            self.growth.extend(dr.unwrap());
+            let dr:Vec<Card> = self.deck_by_type(*kind).draw(per_row).collect();
+            self.growth.extend(dr);
         }
 
         let mut res = Vec::new(); 
