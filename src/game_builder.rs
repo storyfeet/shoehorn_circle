@@ -9,7 +9,6 @@ pub struct GameBuilder{
     g_row_size:usize,
     player_names:Option<Vec<String>>,
     supply:Option<Supply>,
-    history:Option<Vec<Action>>,
     err:Option<ScErr>,
 }
 
@@ -20,15 +19,10 @@ impl GameBuilder{
             nplayers:4,
             player_names:None,
             supply:None,
-            history:None,
             err:None,
         }
     }
 
-    pub fn from_history(mut self,v:Vec<Action>)->Self{
-        self.history = Some(v);
-        self
-    }
 
     pub fn supply_file<P:AsRef<Path>>(mut self,fname:P)->Self{
         match Supply::load(fname){
@@ -67,12 +61,17 @@ impl GameBuilder{
             Some(sp)=>sp,
             None=>Supply::load("card_data/cards.lz")?,
         };
-
         supply.shuffle_decks();
 
-        let players:Vec<Player> = pnames.into_iter().map(|pn| Player::new(&pn,&mut supply)).collect();
+        let mut actions = supply.setup_growth(self.g_row_size);
 
-        let actions = self.history.unwrap_or(supply.setup_growth(3));
+        let mut players = Vec::new();
+        for nm in pnames {
+            let p = Player::new(&nm,&mut supply);
+            actions.extend(p.as_actions());
+            players.push(p);
+        }
+
 
         let mut res = Game{
             players:players,
@@ -80,10 +79,26 @@ impl GameBuilder{
             supply:supply,
         };
 
-        if res.actions.len() > 9{
-            res.run_history();
+        Ok(res)
+    }
+
+    pub fn done_history(self,v:Vec<Action>)->Result<Game,ScErr>{
+        if let Some(e)= self.err {
+            return Err(e);
         }
 
+        let mut supply = match self.supply{
+            Some(sp)=>sp,
+            None=>Supply::load("card_data/cards.lz")?,
+        };
+        supply.shuffle_decks();
+
+        let mut res = Game{
+            players:Vec::new(),
+            actions:Vec::new(),
+            supply:supply,
+        };
+        res.run_actions(v);
         Ok(res)
     }
 

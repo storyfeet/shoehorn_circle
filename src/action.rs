@@ -9,6 +9,8 @@ use bracket_parse::Bracket;
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum Action{
+    AddPlayer(String),
+    PlayerDraw(String,CardKey),
     Pl(PlAction),
     FillGrowth(CardKey),
     BuyGrowth(usize,CardKey,CardKey),//playernum, bought, topup
@@ -42,6 +44,7 @@ impl PlAction{
             act:a,
         }
     }
+
 }
 
     

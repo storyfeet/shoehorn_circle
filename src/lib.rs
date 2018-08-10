@@ -78,16 +78,16 @@ impl Game{
     }
     
 
-    fn run_history(&mut self)->Result<(),ScErr>{
+    fn run_actions<A:IntoIterator<Item=Action>>(&mut self,ac_list:A)->Result<(),ScErr>{
         use action::Action::*;
-        for a in &self.actions {
+        for a in ac_list {
             match a {
                 FillGrowth(ref ck)=>{
                     
                 },
                 _=>{},//TODO
             }
-
+            self.actions.push(a);
         }
         Ok(())
     }
@@ -159,12 +159,15 @@ impl Game{
     }
 
     pub fn is_gm(&self,nm: &str)->bool{
+		
         match self.curr_gm(){
             Some(s)=>s == nm,
             _=>false,
         }
     }
+
 }
+
 
 
 
@@ -181,17 +184,18 @@ mod test{
     #[test]
     fn gm_since(){
         let mut gm = Game::build().done().unwrap();
+        let prelen = gm.actions.len();
 
         for i in 0..4 {
             gm.player_action(PlAction::new("P1",PlActionType::Chat(format!("This action {}",i))));
         }
         assert_eq!(gm.players[0].name , "P0");
-        assert_eq!(gm.since(0).len(),13);//9 growthrow fill actions included
+        assert_eq!(gm.since(0).len(),prelen + 4);
 
-        assert_eq!(gm.since(12).len(),1);
-        assert_eq!(gm.since(13),&[]);
-        assert_eq!(gm.since(14),&[]);
-        assert_eq!(gm.since(20),&[]);
+        assert_eq!(gm.since(prelen).len(),4);
+        assert_eq!(gm.since(prelen+4),&[]);
+        assert_eq!(gm.since(prelen+5),&[]);
+        assert_eq!(gm.since(prelen+20),&[]);
     }
 
     #[test]
@@ -201,14 +205,14 @@ mod test{
         for i in 0 .. 4 {
             gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(2)));
         }
-        assert_eq!(gm.actions.len(),14);
+        let prelen = gm.actions.len();
 
         gm.player_action(PlAction::new(&pname(0),PlActionType::Bid(7)));
-        assert_eq!(gm.actions.len(),15);
+        assert_eq!(gm.actions.len(),prelen+1);
         for i in 1 .. 4 {
             gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(1)));
         }
-        assert_eq!(gm.actions.len(),19);
+        assert_eq!(gm.actions.len(),prelen + 5);
 
         assert_eq!(gm.curr_gm(),Some("P0"));
     }
@@ -220,8 +224,10 @@ mod test{
 
         let history = gm.since(0);
 
-        let mut gm2 = Game::build().from_history(history.clone().to_vec()).done().unwrap();
+        let mut gm2 = Game::build().done_history(history.clone().to_vec()).unwrap();
 
+        //TODO add conditions
+        
         
 
     }

@@ -1,5 +1,6 @@
 use card::{Card,CardType};
 use supply::{Supply};
+use action::{Action};
 
 
 #[derive(Debug,Clone)]
@@ -17,12 +18,23 @@ impl Player {
         cards.extend(&mut s.goals.draw(3));
         cards.extend(&mut s.traits.draw(4));
         cards.extend(&mut s.skills.draw(4));
+
+
         Player{
             name:name.to_string(),
             cards:cards,
             tokens:0,
             dice:8,
         }
+    }
+
+    pub fn as_actions(&self)->Vec<Action>{
+        let mut res = Vec::new();
+        res.push(Action::AddPlayer(self.name.clone()));
+        for c in &self.cards {
+            res.push(Action::PlayerDraw(self.name.clone(),c.into()));
+        }
+        res
     }
 
     pub fn role(&self)->&str{
