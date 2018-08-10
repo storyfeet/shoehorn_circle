@@ -82,7 +82,9 @@ impl Game{
         use action::Action::*;
         for a in &self.actions {
             match a {
-                FillGrowth(ref ck)=>{},//TODO};
+                FillGrowth(ref ck)=>{
+                    
+                },
                 _=>{},//TODO
             }
 
@@ -210,5 +212,19 @@ mod test{
 
         assert_eq!(gm.curr_gm(),Some("P0"));
     }
+
+
+    #[test]
+    fn rebuild_history(){
+        let mut gm =Game::build().done().unwrap();
+
+        let history = gm.since(0);
+
+        let mut gm2 = Game::build().from_history(history.clone().to_vec()).done().unwrap();
+
+        
+
+    }
+
 
 }

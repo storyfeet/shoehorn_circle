@@ -25,6 +25,11 @@ impl GameBuilder{
         }
     }
 
+    pub fn from_history(mut self,v:Vec<Action>)->Self{
+        self.history = Some(v);
+        self
+    }
+
     pub fn supply_file<P:AsRef<Path>>(mut self,fname:P)->Self{
         match Supply::load(fname){
             Ok(s)=>self.supply = Some(s),

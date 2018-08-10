@@ -8,6 +8,7 @@ use std::fmt;
 pub enum ScErr{
     NoLoad(String),
     NoParse(String),
+    NotFound(String),
     OtherErr(String),
 }
 
@@ -20,6 +21,16 @@ impl From<String> for ScErr {
 impl From<ParseIntError> for ScErr{
     fn from(e:ParseIntError)->ScErr{
         ScErr::NoParse(format!("{:?}",e))
+    }
+}
+
+
+impl ScErr{
+    pub fn no_load(s:&str)->ScErr{
+        ScErr::NoLoad(s.to_string())
+    }
+    pub fn not_found(s:&str)->ScErr{
+        ScErr::NotFound(s.to_string())
     }
 }
 

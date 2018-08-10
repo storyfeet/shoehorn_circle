@@ -7,7 +7,7 @@ use bracket_parse::Bracket;
 
 
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub enum Action{
     Pl(PlAction),
     FillGrowth(CardKey),
@@ -17,7 +17,7 @@ pub enum Action{
 }
 
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct PlAction{
     pub player_name:String,
     pub act:PlActionType,

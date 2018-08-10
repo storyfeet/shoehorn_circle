@@ -1,4 +1,4 @@
-use card::{Card,CardType};
+use card::{Card,CardType,CardKey};
 use card_deck::Deck;
 use lazyf::{LzList};
 use std::path::Path;
@@ -82,6 +82,12 @@ impl Supply {
             res.push(Action::FillGrowth(c.into())); 
         }
         res
+    }
+
+    pub fn fill_growth(&mut self,ck:&CardKey)->Result<(),ScErr>{
+        let c= self.deck_by_type(ck.kind).dig_for(|c|c == ck).ok_or(ScErr::not_found(&ck.name))?;
+        self.growth.push(c);
+        Ok(())
     }
 
 }

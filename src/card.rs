@@ -9,8 +9,8 @@ use sc_error::ScErr;
 
 #[derive(Debug,PartialEq,Clone)]
 pub struct CardKey{//primary key
-    name:String,
-    kind:CardType,
+    pub name:String,
+    pub kind:CardType,
 }
 
 impl CardKey{
