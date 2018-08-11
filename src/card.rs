@@ -116,7 +116,7 @@ impl Card{
             name:lz.name.clone(),
             text:lz.get_s_def("tx",""),
             kind:kind,
-            cost:lz.get_t_def("Cost",0),
+            cost:lz.get_t_def("Cost",4),
             tokens:0,
         })
     }

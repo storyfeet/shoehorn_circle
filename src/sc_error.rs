@@ -10,6 +10,9 @@ pub enum ScErr{
     NoParse(String),
     NotFound(String),
     OtherErr(String),
+    NotGm(String),
+    NoDice,
+    NoTokens,
 }
 
 impl From<String> for ScErr {
@@ -31,6 +34,9 @@ impl ScErr{
     }
     pub fn not_found(s:&str)->ScErr{
         ScErr::NotFound(s.to_string())
+    }
+    pub fn not_gm(s:&str)->ScErr{
+        ScErr::NotGm(s.to_string())
     }
 }
 

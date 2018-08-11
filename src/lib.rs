@@ -13,13 +13,13 @@ pub mod supply;
 use supply::{Supply};
 
 pub mod card;
-//use card::CardType;
+use card::CardKey;
 
 pub mod player;
 use player::{Player};
 
 pub mod action;
-use action::{Action,PlAction,PlActionType};
+use action::{Action,Request,RequestType,PlayerRef};
 
 pub mod sc_error;
 use sc_error::ScErr;
@@ -31,6 +31,7 @@ use rand::{Rng,thread_rng};
 
 
 
+#[derive(Debug)]
 pub struct Game{
     pub players:Vec<Player>,
     actions:Vec<Action>,
@@ -51,30 +52,68 @@ impl Game{
         Some(&mut self.players[pnum])
     }
 
-    pub fn player_action(&mut self,ac:PlAction){
-        use PlActionType::*;
-        if self.player_num(&ac.player_name).is_none(){
-            return
-        }
-        
+    pub fn player_action(&mut self,ac:Request)->Result<(),ScErr>{
+        use RequestType::*;
+        let pnum = self.player_num(&ac.player_name).ok_or(ScErr::not_found(&ac.player_name))?;
+
         match ac.act{
-            Chat(_)|Do(_)|Say(_)=>{self.actions.push(Action::Pl(ac))},
-            Bid(_)=>{
-                self.actions.push(Action::Pl(ac));
+            Chat(s)=>
+                self.actions.push(Action::Chat(pnum,s)),
+            Do(s)=>
+                self.actions.push(Action::Do(pnum,s)),
+            Say(s)=>
+                self.actions.push(Action::Say(pnum,s)),
+            Bid(n)=>{
+                self.actions.push(Action::Bid(pnum,n));
                 self.roll_bids();
-            }
+            },
             WhoDunnit(s)=>{
                 if !self.is_gm(&ac.player_name) {
-                    return;
+                    return Err(ScErr::not_gm(&ac.player_name));
                 }
                 let dunnit = thread_rng().gen_range(0,self.players.len()+1);
                 self.actions.push(Action::WhoDunnitIs(dunnit,s));
             }
-            BuyGrowth(s)=>{
+            BuyGrowth(buy,token_from)=>{
+                let mut cost = 0;
+                let cplayer = &mut self.players[pnum];
+                for i in 0 .. self.supply.growth.len(){
+                    {//scope to borrow and check
+                        let c = &self.supply.growth[i];
+                        if *c != buy{
+                            continue; 
+                        }
+                        cost = c.cost;
+                        if cplayer.dice < cost {
+                            return Err(ScErr::NoDice);
+                        }
+                    }
+
+                    //check can afford.
+                    {
+                        let tok_card = (&mut cplayer.cards).into_iter()
+                                .find(|cd|**cd == token_from)
+                                .ok_or(ScErr::not_found(&token_from.name))?;
+                        if tok_card.tokens == 0 {
+                            return Err(ScErr::NoTokens);
+                        }
+                        tok_card.tokens -= 1;
+                    }
+
+                    let bcard = self.supply.growth.remove(i);
+                    let bkey:CardKey = (&bcard).into();
+                    cplayer.cards.push(bcard); 
+                    cplayer.dice -= cost;
+                        
+                    
+                }
+                
+
                 
             }
             _=>{} 
-        }
+        };
+        Ok(())
     }
     
 
@@ -83,10 +122,9 @@ impl Game{
         for a in ac_list {
             match a {
                 AddPlayer(ref pname)=>self.players.push(Player::empty(pname)),
-                PlayerDraw(ref pname, ref ckey)=>{
+                PlayerDraw(p_ref, ref ckey)=>{
                     let card = self.supply.dig(ckey)?;
-                    let mut p = self.player(pname).ok_or(ScErr::not_found(pname))?;
-                    p.cards.push(card)
+                    self.players[p_ref].cards.push(card);
                 }
                 FillGrowth(ref ck)=>{
                     
@@ -105,18 +143,18 @@ impl Game{
             bids.push(None);
         }
         
-        for ac in &self.actions { //Could be more efficient, will do for now
-            match ac {
-                Action::Pl(PlAction{player_name:ref pname,act:PlActionType::Bid(n)})=>{
-                    let pnum = self.player_num(pname).expect("Player name checked already!!!");
-                    bids[pnum] = Some(*n as u16);
-                },
-                Action::Roll(_,_)=>{
-                    for b in &mut bids { *b = None; }
-                },
-                _=>{},
+        { //borrow for iterator
+            let mut ac_it = (&self.actions).into_iter();
+            while let Some(ac)=  ac_it.next_back(){ 
+                match ac {
+                    Action::Bid(p_ref,n)=>{
+                        bids[*p_ref] = Some(*n as u16);
+                    },
+                    Action::Roll(_,_)=>break,
+                    _=>{},
+                }
             }
-        }
+        }//end borrow
 
         let mut rolls =Vec::new();
         let mut maxn = 0;
@@ -192,7 +230,7 @@ mod test{
         let prelen = gm.actions.len();
 
         for i in 0..4 {
-            gm.player_action(PlAction::new("P1",PlActionType::Chat(format!("This action {}",i))));
+            gm.player_action(Request::new("P1",RequestType::Chat(format!("This action {}",i))));
         }
         assert_eq!(gm.players[0].name , "P0");
         assert_eq!(gm.since(0).len(),prelen + 4);
@@ -208,14 +246,14 @@ mod test{
         let mut gm =Game::build().done().unwrap();
 
         for i in 0 .. 4 {
-            gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(2)));
+            gm.player_action(Request::new(&pname(i),RequestType::Bid(2)));
         }
         let prelen = gm.actions.len();
 
-        gm.player_action(PlAction::new(&pname(0),PlActionType::Bid(7)));
+        gm.player_action(Request::new(&pname(0),RequestType::Bid(7)));
         assert_eq!(gm.actions.len(),prelen+1);
         for i in 1 .. 4 {
-            gm.player_action(PlAction::new(&pname(i),PlActionType::Bid(1)));
+            gm.player_action(Request::new(&pname(i),RequestType::Bid(1)));
         }
         assert_eq!(gm.actions.len(),prelen + 5);
 
@@ -240,6 +278,7 @@ mod test{
             assert_eq!(p1.name,p2.name);
             assert_eq!(p1.cards,p2.cards);
         }
+
 
         
     }

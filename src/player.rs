@@ -3,13 +3,14 @@ use supply::{Supply};
 use action::{Action};
 
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub struct Player{
     pub name:String,
     pub cards:Vec<Card>,
-    tokens:u8,
-    dice:u8,
+    pub tokens:u8,
+    pub dice:u8,
 }
+
 
 impl Player { 
     pub fn new(name:&str,s:&mut Supply)->Player{
@@ -37,11 +38,11 @@ impl Player {
         }
     }
 
-    pub fn as_actions(&self)->Vec<Action>{
+    pub fn as_actions(&self,p_ref:usize)->Vec<Action>{
         let mut res = Vec::new();
         res.push(Action::AddPlayer(self.name.clone()));
         for c in &self.cards {
-            res.push(Action::PlayerDraw(self.name.clone(),c.into()));
+            res.push(Action::PlayerDraw(p_ref,c.into()));
         }
         res
     }

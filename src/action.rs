@@ -4,42 +4,46 @@ use sc_error::ScErr;
 //use itertools::Itertools;
 use bracket_parse::Bracket;
 
-
+pub type PlayerRef = usize;
 
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum Action{
+    Chat(PlayerRef,String),//Username, Says
+    Do(PlayerRef,String),//Chat 
+    Say(PlayerRef,String),
+    Bid(PlayerRef,u8),
     AddPlayer(String),
-    PlayerDraw(String,CardKey),
-    Pl(PlAction),
+    PlayerDraw(PlayerRef,CardKey),
     FillGrowth(CardKey),
-    BuyGrowth(usize,CardKey,CardKey),//playernum, bought, topup
+    BuyGrowth(String,CardKey),//player, bought
     Roll(String,Vec<u32>),//winner , Rolls
-    WhoDunnitIs(usize,String), //dunnit playernum , What done
+    WhoDunnitIs(PlayerRef,String), //dunnit playernum , What done
+    Fail(String),
 }
 
 
 #[derive(Debug,PartialEq,Clone)]
-pub struct PlAction{
+pub struct Request{
     pub player_name:String,
-    pub act:PlActionType,
+    pub act:RequestType,
 }
 
 
 #[derive(Debug,PartialEq,Clone)]
-pub enum PlActionType{
+pub enum RequestType{
     Chat(String),
     Do(String),
     Say(String),
     Bid(u8),//ndice
     WhoDunnit(String),//Text for what they done
-    Reward(String,CardKey),//Player Card
-    BuyGrowth(CardKey),
+    Reward(String,CardKey,u8),//Player, Card, dice
+    BuyGrowth(CardKey,CardKey),//Buy what, token from
 }
 
-impl PlAction{
-    pub fn new(nm:&str,a:PlActionType)->Self{
-        PlAction{
+impl Request{
+    pub fn new(nm:&str,a:RequestType)->Self{
+        Request{
             player_name:nm.to_string(),
             act:a,
         }
@@ -50,10 +54,10 @@ impl PlAction{
     
 
 
-impl FromStr for PlAction{
+impl FromStr for Request{
     type Err = ScErr;
     fn from_str(s:&str)->Result<Self,Self::Err>{
-        use self::PlActionType::*;
+        use self::RequestType::*;
         let brack:Bracket = s.parse()?;
 
         let username = match brack.head() {
@@ -65,15 +69,15 @@ impl FromStr for PlAction{
 
         match &h2.match_str().to_lowercase() as &str{
             "chat"=>
-                Ok(PlAction::new(&username, Chat(h3.string_val()))), 
+                Ok(Request::new(&username, Chat(h3.string_val()))), 
             "say"=>
-                Ok(PlAction::new(&username, Say(h3.string_val()))), 
+                Ok(Request::new(&username, Say(h3.string_val()))), 
             "do"=>
-                Ok(PlAction::new(&username, Do(h3.string_val()))), 
+                Ok(Request::new(&username, Do(h3.string_val()))), 
             "whodunnit"=>
-                Ok(PlAction::new(&username, WhoDunnit(h3.string_val()))),
+                Ok(Request::new(&username, WhoDunnit(h3.string_val()))),
             "bid"=>
-                Ok(PlAction::new(&username,Bid(h3.string_val().parse()?))),
+                Ok(Request::new(&username,Bid(h3.string_val().parse()?))),
             offlist=>Err(ScErr::NoParse(format!("Off List {}",offlist))),
         }
     }
@@ -85,10 +89,10 @@ mod tests{
     use super::*;
     #[test]
     fn action_create(){
-        use self::PlActionType::*;
-        assert_eq!(PlAction::from_str("Matt Chat \"hello everybody\"").unwrap(),PlAction::new("Matt",Chat("hello everybody".to_string())));
+        use self::RequestType::*;
+        assert_eq!(Request::from_str("Matt Chat \"hello everybody\"").unwrap(),Request::new("Matt",Chat("hello everybody".to_string())));
         
-        assert_eq!(PlAction::from_str("Matt Bid 4").unwrap(),PlAction::new("Matt",Bid(4)));
+        assert_eq!(Request::from_str("Matt Bid 4").unwrap(),Request::new("Matt",Bid(4)));
     }
 }
 

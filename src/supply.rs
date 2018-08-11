@@ -7,6 +7,7 @@ use action::{Action};
 use std;
 
 
+#[derive(PartialEq,Debug)]
 pub struct Supply{
     pub goals:Deck<Card>,
     pub roles:Deck<Card>,

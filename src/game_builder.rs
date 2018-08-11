@@ -66,9 +66,9 @@ impl GameBuilder{
         let mut actions = supply.setup_growth(self.g_row_size);
 
         let mut players = Vec::new();
-        for nm in pnames {
+        for (i,nm) in pnames.iter().enumerate() {
             let p = Player::new(&nm,&mut supply);
-            actions.extend(p.as_actions());
+            actions.extend(p.as_actions(i));
             players.push(p);
         }
 
