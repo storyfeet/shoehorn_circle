@@ -85,9 +85,13 @@ impl Supply {
     }
 
     pub fn fill_growth(&mut self,ck:&CardKey)->Result<(),ScErr>{
-        let c= self.deck_by_type(ck.kind).dig_for(|c|c == ck).ok_or(ScErr::not_found(&ck.name))?;
+        let c = self.dig(ck)?;
         self.growth.push(c);
         Ok(())
+    }
+
+    pub fn dig(&mut self,ck:&CardKey)->Result<Card,ScErr>{
+        self.deck_by_type(ck.kind).dig_for(|c| c == ck).ok_or(ScErr::not_found(&ck.name))
     }
 
 }

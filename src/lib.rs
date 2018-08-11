@@ -82,6 +82,12 @@ impl Game{
         use action::Action::*;
         for a in ac_list {
             match a {
+                AddPlayer(ref pname)=>self.players.push(Player::empty(pname)),
+                PlayerDraw(ref pname, ref ckey)=>{
+                    let card = self.supply.dig(ckey)?;
+                    let mut p = self.player(pname).ok_or(ScErr::not_found(pname))?;
+                    p.cards.push(card)
+                }
                 FillGrowth(ref ck)=>{
                     
                 },
@@ -159,7 +165,6 @@ impl Game{
     }
 
     pub fn is_gm(&self,nm: &str)->bool{
-		
         match self.curr_gm(){
             Some(s)=>s == nm,
             _=>false,
@@ -227,9 +232,16 @@ mod test{
         let mut gm2 = Game::build().done_history(history.clone().to_vec()).unwrap();
 
         //TODO add conditions
-        
-        
 
+        assert_eq!( gm2.players.len(),4 );
+
+        for (i,p1) in gm.players.iter().enumerate(){
+            let p2= &gm2.players[i]; 
+            assert_eq!(p1.name,p2.name);
+            assert_eq!(p1.cards,p2.cards);
+        }
+
+        
     }
 
 

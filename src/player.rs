@@ -27,6 +27,15 @@ impl Player {
             dice:8,
         }
     }
+		
+    pub fn empty(name:&str)->Player{
+        Player{
+            name:name.to_string(),
+            cards:Vec::new(),
+            tokens:0,
+            dice:8,
+        }
+    }
 
     pub fn as_actions(&self)->Vec<Action>{
         let mut res = Vec::new();
