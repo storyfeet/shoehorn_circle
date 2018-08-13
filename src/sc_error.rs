@@ -13,6 +13,7 @@ pub enum ScErr{
     NotGm(String),
     NoDice,
     NoToken,
+    NoCards,
 }
 
 impl From<String> for ScErr {

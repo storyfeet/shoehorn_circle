@@ -1,6 +1,7 @@
 extern crate shoehorn_circle as shoehorn;
 use shoehorn::Game;
-use shoehorn::card::{CardType};
+use shoehorn::card::{CardType,CardKey};
+use shoehorn::action::Action;
 //use shoehorn::supply::Supply;
 //use shoehorn::player::Player;
 
@@ -13,49 +14,53 @@ fn main(){
 
     let stdin = io::stdin();
 
-    for p in &mut gm.players {
+    for i in 0..gm.players.len(){ 
 
-        println!("{}:" ,p.name);
-        let mut s = String::new();
-        stdin.read_line(&mut s).expect("Could not read Line");
-        for c in &p.cards {
-            println!("  {}:{:?}:{}",c.name,c.kind,c.text);
-        }
+        let mut actions = Vec::new();
+        {//borrow player
 
+            let p = &gm.players[i];
 
-        let ctypes = vec![CardType::Goal,CardType::Role,CardType::Trait,CardType::Skill];
-
-        for t in ctypes {
-            println!("TRAIT : {:?}",t);
-            let mut len = 0;
-            for a in p.cards.iter().filter(|c| c.kind == t){
-                println!("   {}:{}",len,a.name);
-                len += 1;
+            println!("{}:" ,p.name);
+            let mut s = String::new();
+            stdin.read_line(&mut s).expect("Could not read Line");
+            for c in &p.cards {
+                println!("  {}:{:?}:{}",c.name,c.kind,c.text);
             }
-            if len < 2 { continue}
-            let mut ln = String::new();
-            println!("Drop Which?>");
-            stdin.read_line(&mut ln).expect("Could not read Line");
-            let dropn = ln.trim().parse::<usize>().unwrap_or(0)%len;
+
+            let ctypes = vec![CardType::Goal,CardType::Role,CardType::Trait,CardType::Skill];
+
+            for t in ctypes {
+                println!("TRAIT : {:?}",t);
+                let mut keys:Vec<CardKey> = Vec::new();
+                for (i,a) in p.cards.iter()
+                            .filter(|c| c.kind == t).enumerate(){
+                    println!("   {}:{}",i,a.name);
+                    keys.push(a.into());
+                }
+
+                if keys.len() < 2 { continue}
+                let mut ln = String::new();
+                println!("Drop Which?>");
+                stdin.read_line(&mut ln).expect("Could not read Line");
+                let dropn = ln.trim().parse::<usize>().unwrap_or(0);
+
+                if dropn >= keys.len() {continue} //consider later
+
+                let key = &keys[dropn];
+
+                println!("DROPPING {}",key.name);
+                actions.push(Action::DropCard(p.p_num,key.clone()));
+            }
             
-            let mut curr = 0;
-            p.cards.retain(|ref c| {
-                if c.kind != t {
-                    return true;
-                }
-                if curr == dropn {
-                    println!("DROPPING {}",c.name);
-                    curr +=1;
-                    return false;
-                }
-                curr +=1;
-                true
-            });
-        }
+        }// Borrow player
+
+        gm.run_actions(actions).expect("drop actions failed running actions");
 
         println!("Keeping:");
-        for c in &p.cards {
+        for c in &gm.players[i].cards {
             println!("  {:?}::{}:{}",c.kind,c.name,c.text);
         }
-    }
+
+    }//for i in players.len
 }

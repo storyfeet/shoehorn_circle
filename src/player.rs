@@ -60,11 +60,30 @@ impl Player {
         Action::Reward(self.p_num,ckey,ndice)
     }
 
-    pub fn buy_growth(&mut self,buy_key:CardKey,pay_key:CardKey,spp:&mut Supply)->Result<Action,ScErr>{
+    pub fn drop_card(&mut self,key:&CardKey,supply:&mut Supply)->Result<Action,ScErr>{
+        //find
+        let mut found:Option<usize> = None;
+        for (i,c)in self.cards.iter().enumerate(){
+            if *c == *key {
+                found = Some(i); 
+                break;
+            }
+        }
+        match found {
+            Some(n)=>{
+                supply.discard(self.cards.remove(n));
+                Ok(Action::DropCard(self.p_num,key.clone()))
+            }
+            _=>Err(ScErr::not_found(&key.name))
+        }
+        
+    }
+
+    pub fn buy_growth(&mut self,buy_key:&CardKey,pay_key:&CardKey,spp:&mut Supply)->Result<Action,ScErr>{
 
         let (c_loc,c_cost) = spp.growth.iter()
                             .enumerate()
-                            .find(|(_,c)|**c==buy_key)
+                            .find(|(_,c)|**c==*buy_key)
                             .map(|(i,c)|(i,c.cost))
                             .ok_or(ScErr::not_found(&buy_key.name))?;
         
@@ -74,7 +93,7 @@ impl Player {
 
         let tk_loc = self.tokens.iter()
                             .enumerate()
-                            .find(|(_,k)|**k ==pay_key)
+                            .find(|(_,k)|**k ==*pay_key)
                             .map(|(i,_)|i).ok_or(ScErr::NoToken)?;
 
         
@@ -82,11 +101,9 @@ impl Player {
         let bkey:CardKey = (&bcard).into();
 
         self.cards.push(bcard); 
-        self.tokens.remove(tk_loc);
+        let tk_key = self.tokens.remove(tk_loc);
         self.dice -= c_cost;
-        Ok(Action::BuyGrowth(self.p_num,bkey))
-            
-        
+        Ok(Action::BuyGrowth(self.p_num,bkey,tk_key))
 
     }
 

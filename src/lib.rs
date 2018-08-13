@@ -10,7 +10,7 @@ pub mod supply;
 use supply::{Supply};
 
 pub mod card;
-use card::CardKey;
+//use card::CardKey;
 
 pub mod player;
 use player::{Player};
@@ -72,9 +72,15 @@ impl Game{
                 self.actions.push(Action::WhoDunnitIs(dunnit,s));
             }
             BuyGrowth(buy,token_from)=>{
-                let a = self.players[pnum].buy_growth(buy,token_from,&mut self.supply)?;
+                let kn = token_from.kind;
+                let a = self.players[pnum].buy_growth(&buy,&token_from,&mut self.supply)?;
                 self.actions.push(a);
-                //TODO, Fill Growth Row, to make up for lost card.
+
+                let rf_ac = self.supply.fill_growth(kn);
+
+                if let Ok(ac) = rf_ac{
+                    self.actions.push(ac);
+                }
 
             }
             Reward(pname,ckey,ndice)=>{
@@ -82,34 +88,50 @@ impl Game{
                     return Err(ScErr::not_gm(&ac.player_name));
                 }
                 let r_pnum = self.player_num(&pname).ok_or(ScErr::not_found(&pname))?;
-                self.players[r_pnum].reward(ckey.clone(),ndice);
-                self.actions.push(Action::Reward(r_pnum,ckey,ndice));
+                let rw_ac = self.players[r_pnum].reward(ckey,ndice);
+
+                self.actions.push(rw_ac);
                 
             }
         };
         Ok(())
     }
+
+    pub fn run_action(&mut self,a:Action)->Result<(),ScErr>{
+        use action::Action::*;
+        match a {
+            //Consider using get instead of index on playernum or making sure to sanitize
+            //action_history
+            Reward(p_ref,ref ck,ndice)=>{
+                self.players[p_ref].reward(ck.clone(),ndice);
+            },
+            AddPlayer(ref pname)=>{
+                let pnum = self.players.len();
+                self.players.push(Player::empty(pname,pnum))
+            },
+            PlayerDraw(p_ref, ref ckey)=>{
+                let card = self.supply.dig(ckey)?;
+                self.players[p_ref].cards.push(card);
+            }
+            FillGrowth(ref ck)=>{
+                self.supply.redo_fill_growth(ck)?;
+            },
+            BuyGrowth(p_ref,ref ck,ref pay_c)=>{
+                self.players[p_ref].buy_growth(ck,pay_c,&mut self.supply)?;
+            },
+            DropCard(p_ref,ref ck)=>{
+                self.players[p_ref].drop_card(ck,&mut self.supply)?;
+            }
+            _=>{},
+        }
+        self.actions.push(a);
+        Ok(())
+    }
     
 
-    fn run_actions<A:IntoIterator<Item=Action>>(&mut self,ac_list:A)->Result<(),ScErr>{
-        use action::Action::*;
+    pub fn run_actions<A:IntoIterator<Item=Action>>(&mut self,ac_list:A)->Result<(),ScErr>{
         for a in ac_list {
-            match a {
-                AddPlayer(ref pname)=>{
-                    let pnum = self.players.len();
-                    self.players.push(Player::empty(pname,pnum))
-                },
-                PlayerDraw(p_ref, ref ckey)=>{
-                    let card = self.supply.dig(ckey)?;
-                    self.players[p_ref].cards.push(card);
-                }
-                FillGrowth(ref ck)=>{
-                    //TODO
-                    
-                },
-                _=>{},//TODO
-            }
-            self.actions.push(a);
+            self.run_action(a)?;
         }
         Ok(())
     }
@@ -160,7 +182,7 @@ impl Game{
             }//for 
         } //tie
         
-        self.actions.push(Action::Roll(self.players[maxp.unwrap()].name.clone(),rolls));
+        self.actions.push(Action::Roll(maxp.unwrap(),rolls));
     }
 
     pub fn since<'a>(&'a self, mut n:usize)->&'a [Action]{
@@ -170,11 +192,11 @@ impl Game{
         &self.actions[n..]
     }
 
-    pub fn curr_gm<'a>(&'a self)->Option<&'a str>{
+    pub fn curr_gm(&self)->Option<usize>{
         let mut it = self.actions.iter();
         while let Some(n) =  it.next_back() {
-            if let Action::Roll(ref w,_) = n {
-                return Some(w)
+            if let Action::Roll(w,_) = n {
+                return Some(*w)
             }
         }
         None
@@ -182,7 +204,7 @@ impl Game{
 
     pub fn is_gm(&self,nm: &str)->bool{
         match self.curr_gm(){
-            Some(s)=>s == nm,
+            Some(n)=>&self.players[n].name == nm,
             _=>false,
         }
     }
@@ -235,7 +257,7 @@ mod test{
         }
         assert_eq!(gm.actions.len(),prelen + 5);
 
-        assert_eq!(gm.curr_gm(),Some("P0"));
+        assert_eq!(gm.curr_gm(),Some(0));
     }
 
 

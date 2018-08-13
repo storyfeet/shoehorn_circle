@@ -84,10 +84,22 @@ impl Supply {
         res
     }
 
-    pub fn fill_growth(&mut self,ck:&CardKey)->Result<(),ScErr>{
+    pub fn redo_fill_growth(&mut self,ck:&CardKey)->Result<Action,ScErr>{
         let c = self.dig(ck)?;
         self.growth.push(c);
-        Ok(())
+        Ok(Action::FillGrowth(ck.clone()))
+    }
+
+    pub fn fill_growth(&mut self,k:CardType)->Result<Action,ScErr>{
+        let c_op = self.deck_by_type(k).draw_1();
+        match c_op {
+            Some(c)=>{
+                let res = (&c).into();
+                self.growth.push(c);
+                Ok(Action::FillGrowth(res))
+            }
+            None => Err(ScErr::NoCards)
+        }
     }
 
     pub fn dig(&mut self,ck:&CardKey)->Result<Card,ScErr>{

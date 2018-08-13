@@ -9,18 +9,18 @@ pub type PlayerRef = usize;
 
 #[derive(Debug,PartialEq,Clone)]
 pub enum Action{
-    Chat(PlayerRef,String),//Username, Says
-    Do(PlayerRef,String),//Chat 
-    Say(PlayerRef,String),
-    Bid(PlayerRef,u8),
+    Chat(PlayerRef,String),
+    Do(PlayerRef,String),
+    Say(PlayerRef,String), 
+    Bid(PlayerRef,u8),//num dice
     Reward(PlayerRef,CardKey,u8),
     AddPlayer(String),
     PlayerDraw(PlayerRef,CardKey),
     FillGrowth(CardKey),
-    BuyGrowth(PlayerRef,CardKey),//player, bought
-    Roll(String,Vec<u32>),//winner , Rolls
+    BuyGrowth(PlayerRef,CardKey,CardKey),//player, bought, token from
+    Roll(PlayerRef,Vec<u32>),//winner , Rolls
     WhoDunnitIs(PlayerRef,String), //dunnit playernum , What done
-    Fail(String),
+    DropCard(PlayerRef,CardKey),
 }
 
 
