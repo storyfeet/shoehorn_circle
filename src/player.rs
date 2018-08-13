@@ -1,4 +1,4 @@
-use card::{Card,CardType};
+use card::{Card,CardType,CardKey};
 use supply::{Supply};
 use action::{Action};
 
@@ -6,49 +6,57 @@ use action::{Action};
 #[derive(Debug,Clone,PartialEq)]
 pub struct Player{
     pub name:String,
+    pub p_num:usize,
     pub cards:Vec<Card>,
-    pub tokens:u8,
+    pub tokens:Vec<CardKey>,
     pub dice:u8,
 }
 
 
 impl Player { 
-    pub fn new(name:&str,s:&mut Supply)->Player{
+    pub fn new(name:&str,pnum:usize,s:&mut Supply)->Player{
         let mut cards:Vec<Card> = Vec::new(); 
         cards.extend(&mut s.roles.draw(2));
         cards.extend(&mut s.goals.draw(3));
         cards.extend(&mut s.traits.draw(4));
         cards.extend(&mut s.skills.draw(4));
 
-
         Player{
             name:name.to_string(),
+            p_num:pnum,
             cards:cards,
-            tokens:0,
+            tokens:Vec::new(),
             dice:8,
         }
     }
 		
-    pub fn empty(name:&str)->Player{
+    pub fn empty(name:&str,pnum:usize)->Player{
         Player{
             name:name.to_string(),
+            p_num:pnum,
             cards:Vec::new(),
-            tokens:0,
+            tokens:Vec::new(),
             dice:8,
         }
     }
 
-    pub fn as_actions(&self,p_ref:usize)->Vec<Action>{
+    pub fn as_actions(&self)->Vec<Action>{
         let mut res = Vec::new();
         res.push(Action::AddPlayer(self.name.clone()));
         for c in &self.cards {
-            res.push(Action::PlayerDraw(p_ref,c.into()));
+            res.push(Action::PlayerDraw(self.p_num,c.into()));
         }
         res
     }
 
     pub fn role(&self)->&str{
         self.cards.iter().find(|c|c.kind == CardType::Role).map(|c|&c.name as &str).unwrap_or("NO-ROLE")
+    }
+
+    pub fn reward(&mut self, ckey:CardKey,ndice:u8)->Action{
+        self.dice += ndice;
+        self.tokens.push(ckey.clone());
+        Action::Reward(self.p_num,ckey,ndice)
     }
 
 }
@@ -63,7 +71,7 @@ mod tests {
     #[test]
     fn test_loadfilter(){
         let mut sp = Supply::load("card_data/cards.lz").unwrap();
-        let p = Player::new("matt",&mut sp); 
+        let p = Player::new("matt",0,&mut sp); 
         assert_eq!(p.cards.len(),13,"{:?}",p);
 
         let mut tot = 0;

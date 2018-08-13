@@ -107,8 +107,11 @@ impl Game{
                         
                     
                 }
-                
-
+            }
+            Reward(pname,ckey,ndice)=>{
+                if !self.is_gm(&ac.player_name) {
+                    return Err(ScErr::not_gm(&ac.player_name));
+                }
                 
             }
             _=>{} 
@@ -121,7 +124,10 @@ impl Game{
         use action::Action::*;
         for a in ac_list {
             match a {
-                AddPlayer(ref pname)=>self.players.push(Player::empty(pname)),
+                AddPlayer(ref pname)=>{
+                    let pnum = self.players.len();
+                    self.players.push(Player::empty(pname,pnum))
+                },
                 PlayerDraw(p_ref, ref ckey)=>{
                     let card = self.supply.dig(ckey)?;
                     self.players[p_ref].cards.push(card);

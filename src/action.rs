@@ -13,6 +13,7 @@ pub enum Action{
     Do(PlayerRef,String),//Chat 
     Say(PlayerRef,String),
     Bid(PlayerRef,u8),
+    Reward(PlayerRef,CardKey,u8),
     AddPlayer(String),
     PlayerDraw(PlayerRef,CardKey),
     FillGrowth(CardKey),
