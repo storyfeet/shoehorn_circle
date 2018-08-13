@@ -94,7 +94,6 @@ pub struct Card{
     pub text:String,
     pub kind:CardType,
     pub cost:u8,
-    pub tokens:u8,
 }
 
 impl Card{
@@ -104,7 +103,6 @@ impl Card{
             text:tx.to_string(),
             kind:kind,
             cost:cost,
-            tokens:0,
         }
     }
     pub fn from_lz(lz:&Lz)->Result<Card,String>{
@@ -117,7 +115,6 @@ impl Card{
             text:lz.get_s_def("tx",""),
             kind:kind,
             cost:lz.get_t_def("Cost",4),
-            tokens:0,
         })
     }
 }
