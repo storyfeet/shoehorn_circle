@@ -12,7 +12,7 @@ pub enum ScErr{
     OtherErr(String),
     NotGm(String),
     NoDice,
-    NoTokens,
+    NoToken,
 }
 
 impl From<String> for ScErr {

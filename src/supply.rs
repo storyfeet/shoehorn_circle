@@ -4,7 +4,6 @@ use lazyf::{LzList};
 use std::path::Path;
 use sc_error::ScErr;
 use action::{Action};
-use std;
 
 
 #[derive(PartialEq,Debug)]

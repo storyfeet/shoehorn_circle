@@ -6,9 +6,6 @@ extern crate rand;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
-use std::path::Path;
-
-
 pub mod supply;
 use supply::{Supply};
 
@@ -19,7 +16,7 @@ pub mod player;
 use player::{Player};
 
 pub mod action;
-use action::{Action,Request,RequestType,PlayerRef};
+use action::{Action,Request,RequestType};
 
 pub mod sc_error;
 use sc_error::ScErr;
@@ -75,46 +72,20 @@ impl Game{
                 self.actions.push(Action::WhoDunnitIs(dunnit,s));
             }
             BuyGrowth(buy,token_from)=>{
-                let mut cost = 0;
-                let cplayer = &mut self.players[pnum];
-                for i in 0 .. self.supply.growth.len(){
-                    {//scope to borrow and check
-                        let c = &self.supply.growth[i];
-                        if *c != buy{
-                            continue; 
-                        }
-                        cost = c.cost;
-                        if cplayer.dice < cost {
-                            return Err(ScErr::NoDice);
-                        }
-                    }
+                let a = self.players[pnum].buy_growth(buy,token_from,&mut self.supply)?;
+                self.actions.push(a);
+                //TODO, Fill Growth Row, to make up for lost card.
 
-                    //check can afford.
-                    {
-                        let tok_card = (&mut cplayer.cards).into_iter()
-                                .find(|cd|**cd == token_from)
-                                .ok_or(ScErr::not_found(&token_from.name))?;
-                        if tok_card.tokens == 0 {
-                            return Err(ScErr::NoTokens);
-                        }
-                        tok_card.tokens -= 1;
-                    }
-
-                    let bcard = self.supply.growth.remove(i);
-                    let bkey:CardKey = (&bcard).into();
-                    cplayer.cards.push(bcard); 
-                    cplayer.dice -= cost;
-                        
-                    
-                }
             }
             Reward(pname,ckey,ndice)=>{
                 if !self.is_gm(&ac.player_name) {
                     return Err(ScErr::not_gm(&ac.player_name));
                 }
+                let r_pnum = self.player_num(&pname).ok_or(ScErr::not_found(&pname))?;
+                self.players[r_pnum].reward(ckey.clone(),ndice);
+                self.actions.push(Action::Reward(r_pnum,ckey,ndice));
                 
             }
-            _=>{} 
         };
         Ok(())
     }
@@ -133,6 +104,7 @@ impl Game{
                     self.players[p_ref].cards.push(card);
                 }
                 FillGrowth(ref ck)=>{
+                    //TODO
                     
                 },
                 _=>{},//TODO
@@ -236,7 +208,7 @@ mod test{
         let prelen = gm.actions.len();
 
         for i in 0..4 {
-            gm.player_action(Request::new("P1",RequestType::Chat(format!("This action {}",i))));
+            gm.player_action(Request::new("P1",RequestType::Chat(format!("This action {}",i)))).unwrap();
         }
         assert_eq!(gm.players[0].name , "P0");
         assert_eq!(gm.since(0).len(),prelen + 4);
@@ -252,14 +224,14 @@ mod test{
         let mut gm =Game::build().done().unwrap();
 
         for i in 0 .. 4 {
-            gm.player_action(Request::new(&pname(i),RequestType::Bid(2)));
+            gm.player_action(Request::new(&pname(i),RequestType::Bid(2))).unwrap();
         }
         let prelen = gm.actions.len();
 
-        gm.player_action(Request::new(&pname(0),RequestType::Bid(7)));
+        gm.player_action(Request::new(&pname(0),RequestType::Bid(7))).unwrap();
         assert_eq!(gm.actions.len(),prelen+1);
         for i in 1 .. 4 {
-            gm.player_action(Request::new(&pname(i),RequestType::Bid(1)));
+            gm.player_action(Request::new(&pname(i),RequestType::Bid(1))).unwrap();
         }
         assert_eq!(gm.actions.len(),prelen + 5);
 
@@ -269,11 +241,11 @@ mod test{
 
     #[test]
     fn rebuild_history(){
-        let mut gm =Game::build().done().unwrap();
+        let gm =Game::build().done().unwrap();
 
         let history = gm.since(0);
 
-        let mut gm2 = Game::build().done_history(history.clone().to_vec()).unwrap();
+        let gm2 = Game::build().done_history(history.clone().to_vec()).unwrap();
 
         //TODO add conditions
 

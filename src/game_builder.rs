@@ -73,13 +73,11 @@ impl GameBuilder{
         }
 
 
-        let mut res = Game{
+        Ok( Game{
             players:players,
             actions:actions,
             supply:supply,
-        };
-
-        Ok(res)
+        })
     }
 
     pub fn done_history(self,v:Vec<Action>)->Result<Game,ScErr>{
@@ -98,7 +96,7 @@ impl GameBuilder{
             actions:Vec::new(),
             supply:supply,
         };
-        res.run_actions(v);
+        res.run_actions(v)?;
         Ok(res)
     }
 

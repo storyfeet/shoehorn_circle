@@ -17,7 +17,7 @@ pub enum Action{
     AddPlayer(String),
     PlayerDraw(PlayerRef,CardKey),
     FillGrowth(CardKey),
-    BuyGrowth(String,CardKey),//player, bought
+    BuyGrowth(PlayerRef,CardKey),//player, bought
     Roll(String,Vec<u32>),//winner , Rolls
     WhoDunnitIs(PlayerRef,String), //dunnit playernum , What done
     Fail(String),
