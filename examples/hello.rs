@@ -1,11 +1,15 @@
 extern crate shoehorn_circle as shoehorn;
+extern crate bracket_parse;
 use shoehorn::{Game,ScErr};
 use shoehorn::card::{CardType,CardKey};
-use shoehorn::action::Action;
+use shoehorn::action::{Action,Request};
 //use shoehorn::supply::Supply;
 //use shoehorn::player::Player;
 
+use bracket_parse::Bracket;
+
 use std::io;
+use std::str::FromStr;
 
 
 
@@ -75,7 +79,64 @@ fn setup()->Result<Game,ScErr>{
 }
 
 
+pub enum Job{
+    Quit,
+    Nothing,
+}
+
+pub fn do_bracket(b:Bracket,gm:&mut Game)->Result<Job,ScErr>{
+        match b {
+            Bracket::Leaf(s)=>match &s as &str{
+                "quit"=>return Ok(Job::Quit),
+                t => println!("{}",t),
+            }
+            Bracket::Empty=>return Ok(Job::Nothing),
+            Bracket::Branch(_)=> match b.head().match_str() {
+                "since"=>{
+                    let n:usize = b.tail_h(1).match_str().parse()?;
+                    let ac = gm.since(n);
+                    for a in ac {
+                        println!("{:?}",a);
+                    }
+                }
+                _=>{
+                    let rs = Request::from_bracket(b)?;
+                    gm.player_action(rs)?;
+                }
+            }
+        }
+        Ok(Job::Nothing)
+}
+
+
+
 fn main(){
-    let _gm = setup().unwrap();
+    let mut gm = setup().unwrap();
+    let stdin = io::stdin();
+
+    loop {
+        println!("What would you like to do?");
+        let mut line = String::new(); 
+        stdin.read_line(&mut line).unwrap();//more carful if game needs saving I guess
+        let tline = line.trim();
+        let b = match Bracket::from_str(tline){
+            Ok(bk)=>bk,
+            Err(e)=>{
+                println!("{:?}",e);
+                continue
+            }
+        };
+        
+        match do_bracket(b,&mut gm) {
+            Ok(Job::Quit)=>return,
+            Err(e)=>println!("OUTSIDE ERR{:?}",e),
+            _=>println!("Done Safely"),
+        }
+        
+        
+    }
+
+
+   
 
 }
