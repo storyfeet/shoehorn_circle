@@ -85,11 +85,10 @@ impl Game{
                 self.actions.push(Action::WhoDunnitIs(dunnit,s));
             }
             BuyGrowth(buy,token_from)=>{
-                let kn = token_from.kind;
                 let a = self.players[pnum].buy_growth(&buy,&token_from,&mut self.supply)?;
                 self.actions.push(a);
 
-                let rf_ac = self.supply.fill_growth(kn);
+                let rf_ac = self.supply.fill_growth(buy.kind);
 
                 if let Ok(ac) = rf_ac{
                     self.actions.push(ac);
