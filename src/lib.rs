@@ -7,6 +7,7 @@ extern crate rand;
 //#[macro_use] extern crate enum_derive;
 
 use rand::{Rng,thread_rng};
+use std::cmp::min;
 
 pub mod supply;
 use supply::{Supply};
@@ -70,6 +71,9 @@ impl Game{
             Say(s)=>
                 self.actions.push(Action::Say(pnum,s)),
             Bid(n)=>{
+                if self.players[pnum].dice < n {
+                    return Err(ScErr::NoDice);
+                }
                 self.actions.push(Action::Bid(pnum,n));
                 self.roll_bids();
             },
@@ -131,6 +135,20 @@ impl Game{
             DropCard(p_ref,ref ck)=>{
                 self.players[p_ref].drop_card(ck,&mut self.supply)?;
             }
+            Roll(ref rs)=>{
+                let w = action::roll_winner(rs);
+                let mut it = self.actions.iter();
+                while let Some(ac) = it.next_back(){
+                    if let Bid(n,d) = ac {
+                        if *n == w {
+                            self.players[w].dice -= 
+                                std::cmp::min(self.players[w].dice,
+                                                *d);
+                            break;
+                        }
+                    }
+                }
+            },
             _=>{},
         }
         self.actions.push(a);
@@ -147,7 +165,7 @@ impl Game{
 
 
     fn roll_bids(&mut self){ 
-        let mut bids:Vec<Option<u16>> = Vec::new();
+        let mut bids:Vec<Option<u8>> = Vec::new();
         for _ in 0..self.players.len(){
             bids.push(None);
         }
@@ -157,9 +175,11 @@ impl Game{
             while let Some(ac)=  ac_it.next_back(){ 
                 match ac {
                     Action::Bid(p_ref,n)=>{
-                        bids[*p_ref] = Some(*n as u16);
+                        if bids[*p_ref] == None{
+                            bids[*p_ref] = Some(min(*n,self.players[*p_ref].dice));
+                        }
                     },
-                    Action::Roll(_,_)=>break,
+                    Action::Roll(_)=>break,
                     _=>{},
                 }
             }
@@ -190,8 +210,10 @@ impl Game{
                 }//match
             }//for 
         } //tie
+        let maxp = maxp.unwrap(); //only left the loop if Some
         
-        self.actions.push(Action::Roll(maxp.unwrap(),rolls));
+        self.players[maxp].dice -= bids[maxp].unwrap();
+        self.actions.push(Action::Roll(rolls));
     }
 
     pub fn since<'a>(&'a self, mut n:usize)->&'a [Action]{
@@ -204,8 +226,9 @@ impl Game{
     pub fn curr_gm(&self)->Option<usize>{
         let mut it = self.actions.iter();
         while let Some(n) =  it.next_back() {
-            if let Action::Roll(w,_) = n {
-                return Some(*w)
+            if let Action::Roll(ref rs) = n {
+                let w = action::roll_winner(rs);
+                return Some(w)
             }
         }
         None

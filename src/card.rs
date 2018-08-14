@@ -13,6 +13,7 @@ pub struct CardKey{//primary key
     pub kind:CardType,
 }
 
+
 impl CardKey{
     pub fn new(nm:&str,kind:CardType)->CardKey{
         CardKey{

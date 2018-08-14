@@ -7,6 +7,7 @@ use bracket_parse::Bracket;
 pub type PlayerRef = usize;
 
 
+
 #[derive(Debug,PartialEq,Clone)]
 pub enum Action{
     Chat(PlayerRef,String),
@@ -18,11 +19,22 @@ pub enum Action{
     PlayerDraw(PlayerRef,CardKey),
     FillGrowth(CardKey),
     BuyGrowth(PlayerRef,CardKey,CardKey),//player, bought, token from
-    Roll(PlayerRef,Vec<u32>),//winner , Rolls
+    Roll(Vec<u32>),//Rolls
     WhoDunnitIs(PlayerRef,String), //dunnit playernum , What done
     DropCard(PlayerRef,CardKey),
 }
 
+pub fn roll_winner(v:&Vec<u32>)->usize{
+    let mut winner:usize = 0;
+    let mut top:u32 = 0;
+    for (i,n) in v.iter().enumerate() {
+        if *n > top {
+            winner = i;
+            top = *n;
+        }
+    }
+    return winner;
+}
 
 #[derive(Debug,PartialEq,Clone)]
 pub struct Request{

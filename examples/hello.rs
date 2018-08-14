@@ -99,6 +99,29 @@ pub fn do_bracket(b:Bracket,gm:&mut Game)->Result<Job,ScErr>{
                         println!("{:?}",a);
                     }
                 }
+                "show"=> match b.tail_h(1).match_str(){
+                    "players"=>{
+                        for p in gm.get_players() {
+                            println!("{}:{} -- d:{} -- t:{}",p.name,p.role(),p.dice,p.tokens.len());
+                        }
+                    }
+                    "player"=>{
+                        let fs =  b.tail_h(2).string_val();
+                        let p = gm.get_players().iter().find(|p|p.name == fs).ok_or(ScErr::NotFound(fs))?;
+                        println!("{}:{} -- d:{} -- t:{}",p.name,p.role(),p.dice,p.tokens.len());
+                        println!("Tokens   {:?}",p.tokens);
+                        for c in &p.cards {
+                            println!("   {}:{:?}",c.name,c.kind);
+                        }
+                        
+                    }
+                    "growth"=>{
+                        for c in &gm.get_supply().growth{
+                            println!("  {}:{:?}",c.name,c.kind);
+                        }
+                    }
+                    _=>{},
+                },
                 _=>{
                     let rs = Request::from_bracket(b)?;
                     gm.player_action(rs)?;
@@ -129,7 +152,7 @@ fn main(){
         
         match do_bracket(b,&mut gm) {
             Ok(Job::Quit)=>return,
-            Err(e)=>println!("OUTSIDE ERR{:?}",e),
+            Err(e)=>println!("ERROR {:?}",e),
             _=>println!("Done Safely"),
         }
         
