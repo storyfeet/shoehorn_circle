@@ -6,6 +6,8 @@ extern crate rand;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
+use rand::{Rng,thread_rng};
+
 pub mod supply;
 use supply::{Supply};
 
@@ -19,18 +21,17 @@ pub mod action;
 use action::{Action,Request,RequestType};
 
 pub mod sc_error;
-use sc_error::ScErr;
+pub use sc_error::ScErr;
 
 mod game_builder;
 use game_builder::GameBuilder;
 
-use rand::{Rng,thread_rng};
 
 
 
 #[derive(Debug)]
 pub struct Game{
-    pub players:Vec<Player>,
+    players:Vec<Player>,
     actions:Vec<Action>,
     supply:Supply,
 }
@@ -47,6 +48,14 @@ impl Game{
     pub fn player<'a>(&'a mut self,name:&str)->Option<&'a mut Player>{
         let pnum = self.player_num(name)?;
         Some(&mut self.players[pnum])
+    }
+
+    pub fn get_players<'a>(&'a self)->&'a Vec<Player>{
+        &self.players
+    }
+
+    pub fn get_supply<'a>(&'a self)->&'a Supply{
+        &self.supply
     }
 
     pub fn player_action(&mut self,ac:Request)->Result<(),ScErr>{
@@ -217,6 +226,9 @@ impl Game{
 #[cfg(test)]
 mod test{
     use ::*;
+    use action::Action::*;
+    use card::{CardKey,CardType};
+    use std::str::FromStr;
     
     //test util
     fn pname(n:usize)->String{
@@ -278,10 +290,48 @@ mod test{
             assert_eq!(p1.name,p2.name);
             assert_eq!(p1.cards,p2.cards);
         }
-
-
         
     }
+
+
+    #[test]
+    fn test_all_actions(){
+        let ac = vec![
+            AddPlayer("matt".to_string()),
+            AddPlayer("toby".to_string()),
+            PlayerDraw(0,CardKey::new("Styles Malone",CardType::Role)),
+            PlayerDraw(1,CardKey::new("Princess Charmina",CardType::Role)),
+            PlayerDraw(1,CardKey::new("Swordsman",CardType::Skill)),
+            FillGrowth(CardKey::new("Lock Pick",CardType::Skill)),
+            Bid(0,7),
+        ];
+
+        let mut gm = Game::build().done_history(ac).unwrap();
+        assert_eq!(gm.get_players().len(),2);
+        assert_eq!(gm.get_players()[0].role(),"Styles Malone");
+        assert_eq!(gm.curr_gm(),None);
+
+        gm.player_action(Request::new("toby",RequestType::Bid(1))).unwrap();
+        assert_eq!(gm.curr_gm(),Some(0));
+
+        gm.player_action(Request::from_str(
+                "matt reward toby (Swordsman Skill) 2").unwrap()).unwrap();
+
+        assert_eq!(gm.get_players()[1].tokens[0],CardKey::new("Swordsman",CardType::Skill));
+
+        gm.player_action(Request::from_str(
+                r#"toby buy ("Lock Pick" Skill) (Swordsman Skill)"# 
+                ).unwrap()).unwrap();
+
+        assert_eq!(gm.get_players()[1].tokens.len(), 0);
+        assert_eq!(gm.get_players()[1].cards[2],CardKey::new("Lock Pick",CardType::Skill));
+
+        //test failing action 
+        assert!(gm.player_action(Request::from_str(
+                r#"toby buy ("Lock Puck" Skill) (Swordsman Skill)"# 
+                ).unwrap()).is_err());
+    }
+
 
 
 }

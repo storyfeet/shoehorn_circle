@@ -30,7 +30,7 @@ impl CardKey{
                     _=>Err(ScErr::NoParse("Not enough args".to_string())),
                 }
             },
-            _=>Err(ScErr::NoParse("Card Key not Bracker::Branch".to_string())),
+            _=>Err(ScErr::NoParse("Card Key not Bracket::Branch".to_string())),
         }
     }
 }

@@ -50,17 +50,8 @@ impl Request{
         }
     }
 
-}
-
-    
-
-
-impl FromStr for Request{
-    type Err = ScErr;
-    fn from_str(s:&str)->Result<Self,Self::Err>{
+    pub fn from_bracket(brack:Bracket)->Result<Self,ScErr>{
         use self::RequestType::*;
-        let brack:Bracket = s.parse()?;
-
         let username = match brack.head() {
             Bracket::Leaf(ref s)=>s.to_string(),
             _=>return Err(ScErr::NoParse("No name supplied".to_string())),
@@ -79,8 +70,32 @@ impl FromStr for Request{
                 Ok(Request::new(&username, WhoDunnit(h3.string_val()))),
             "bid"=>
                 Ok(Request::new(&username,Bid(h3.string_val().parse()?))),
+            "reward"=>{
+                let ck = CardKey::from_bracket(brack.tail_h(3))?;
+                let ndice:u8 = brack.tail_h(4).string_val().parse()?;
+                Ok(Request::new(&username,Reward(h3.string_val(),ck,ndice)))
+            },
+            "buy"=>{
+                let ck = CardKey::from_bracket(h3)?;
+                let cfrom = CardKey::from_bracket(brack.tail_h(3))?;
+                Ok(Request::new(&username,BuyGrowth(ck,cfrom)))
+            }
+            
             offlist=>Err(ScErr::NoParse(format!("Off List {}",offlist))),
         }
+    }
+
+}
+
+    
+
+
+impl FromStr for Request{
+    type Err = ScErr;
+    fn from_str(s:&str)->Result<Self,Self::Err>{
+        let brack:Bracket = s.parse()?;
+        Self::from_bracket(brack)
+
     }
 }
 
@@ -88,12 +103,18 @@ impl FromStr for Request{
 #[cfg(test)]
 mod tests{
     use super::*;
+    use card::{CardType,CardKey};
     #[test]
     fn action_create(){
         use self::RequestType::*;
         assert_eq!(Request::from_str("Matt Chat \"hello everybody\"").unwrap(),Request::new("Matt",Chat("hello everybody".to_string())));
         
         assert_eq!(Request::from_str("Matt Bid 4").unwrap(),Request::new("Matt",Bid(4)));
+
+        assert_eq!(
+            Request::from_str("Matt Reward Toby (Swordsman Skill) 3").unwrap(),
+            Request::new("Matt",Reward("Toby".to_string(),CardKey::new("Swordsman",CardType::Skill),3)));
+
     }
 }
 
