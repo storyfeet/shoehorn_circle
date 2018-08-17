@@ -7,7 +7,7 @@ use bracket_parse::Bracket;
 use sc_error::ScErr;
 
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
 pub struct CardKey{//primary key
     pub name:String,
     pub kind:CardType,
@@ -62,9 +62,7 @@ impl PartialEq<CardKey>for Card{
 }
 
 
-
-
-#[derive(Clone,Copy,Debug,PartialEq)]//,EnumFromStr)]
+#[derive(Clone,Copy,Debug,PartialEq,Serialize,Deserialize)]//,EnumFromStr)]
 pub enum CardType{
     Goal,
     Role,

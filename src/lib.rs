@@ -3,6 +3,7 @@ extern crate lazyf;
 extern crate itertools;
 extern crate bracket_parse;
 extern crate rand;
+#[macro_use] extern crate serde_derive;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
@@ -275,12 +276,14 @@ mod test{
         assert_eq!(gm.since(prelen+20),&[]);
     }
 
+
+
     #[test]
     fn rolls_correct(){
         let mut gm =Game::build().done().unwrap();
 
         for i in 0 .. 4 {
-            gm.player_action(Request::new(&pname(i),RequestType::Bid(2))).unwrap();
+            gm.player_action(Request::new(&pname(i),RequestType::Bid(1))).unwrap();
         }
         let prelen = gm.actions.len();
 

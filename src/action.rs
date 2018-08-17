@@ -8,7 +8,7 @@ pub type PlayerRef = usize;
 
 
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
 pub enum Action{
     Chat(PlayerRef,String),
     Do(PlayerRef,String),
@@ -36,14 +36,14 @@ pub fn roll_winner(v:&Vec<u32>)->usize{
     return winner;
 }
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
 pub struct Request{
     pub player_name:String,
     pub act:RequestType,
 }
 
 
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
 pub enum RequestType{
     Chat(String),
     Do(String),
@@ -127,6 +127,15 @@ mod tests{
             Request::from_str("Matt Reward Toby (Swordsman Skill) 3").unwrap(),
             Request::new("Matt",Reward("Toby".to_string(),CardKey::new("Swordsman",CardType::Skill),3)));
 
+    }
+
+    #[test]
+    fn serdize(){
+        let r = Request::from_str("Matt Chat \"hello everybody\"").unwrap(),Request::new("Matt",Chat("hello everybody".to_string()))
+
+        
+
+        
     }
 }
 
