@@ -115,6 +115,7 @@ impl FromStr for Request{
 #[cfg(test)]
 mod tests{
     use super::*;
+    use serde_json;
     use card::{CardType,CardKey};
     #[test]
     fn action_create(){
@@ -131,9 +132,17 @@ mod tests{
 
     #[test]
     fn serdize(){
-        let r = Request::from_str("Matt Chat \"hello everybody\"").unwrap(),Request::new("Matt",Chat("hello everybody".to_string()))
+        let r = Request::from_str("Matt Chat \"hello everybody\"").unwrap();
 
-        
+        let rout = serde_json::to_string(&r).unwrap();
+
+        let rjson = r#"{"player_name":"Matt","act":{"Chat":"hello everybody"}}"#;
+
+        assert_eq!(rout,rjson);
+
+        let r2:Request = serde_json::from_str(rjson).unwrap();
+
+        assert_eq!(r,r2);
 
         
     }

@@ -4,6 +4,7 @@ extern crate itertools;
 extern crate bracket_parse;
 extern crate rand;
 #[macro_use] extern crate serde_derive;
+extern crate serde_json;
 //#[macro_use] extern crate macro_attr;
 //#[macro_use] extern crate enum_derive;
 
