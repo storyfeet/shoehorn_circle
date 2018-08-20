@@ -1,9 +1,10 @@
-use card::{Card,CardType,CardKey};
+use card::{CardType,CardKey};
 use card_deck::Deck;
 use lazyf::{LzList};
 use std::path::Path;
 use sc_error::ScErr;
 use action::{Action};
+use std::collections::HashMap;
 
 
 #[derive(PartialEq,Debug)]
@@ -31,19 +32,17 @@ impl Supply {
             growth:Vec::new(),
         }
     }
-    pub fn load<P:AsRef<Path>>(fname:P)->Result<Supply,ScErr>{
-        let lzl = LzList::load(fname)?;
-        let mut res = Self::new();
-        for lz in lzl.iter() {
-            let c = match Card::from_lz(lz){
-                Ok(cv)=>cv,
-                _=>continue,
-            };
-            
-            res.deck_by_type(c.kind).push_bottom(c);
+
+
+    pub fn from_map(mp:& HashMap<CardKey,CardData>)->Supply{
+        let mut res = Self::new(); 
+        for (k,_) in mp {
+            res.deck_by_type(k.kind).push_bottom(k);
         }
-        Ok(res)
+        res.shuffle_decks();
+        res
     }
+
 
     pub fn deck_by_type<'a>(&'a mut self,kind:CardType)->&'a mut Deck<Card>{
         match kind {

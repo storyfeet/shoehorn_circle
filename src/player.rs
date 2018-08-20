@@ -1,4 +1,4 @@
-use card::{Card,CardType,CardKey};
+use card::{CardType,CardKey};// TODO Use Card DATA for buy
 use supply::{Supply};
 use action::{Action};
 use sc_error::ScErr;
@@ -84,7 +84,7 @@ impl Player {
         let (c_loc,c_cost) = spp.growth.iter()
                             .enumerate()
                             .find(|(_,c)|**c==*buy_key)
-                            .map(|(i,c)|(i,c.cost))
+                            .map(|(i,_)|(i,4))//.map(|(i,c)|(i,c.cost)) TODO FIX
                             .ok_or(ScErr::not_found(&buy_key.name))?;
         
         if c_cost > self.dice {
@@ -98,12 +98,11 @@ impl Player {
 
         
         let bcard = spp.growth.remove(c_loc);
-        let bkey:CardKey = (&bcard).into();
 
-        self.cards.push(bcard); 
+        self.cards.push(bcard.clone()); 
         let tk_key = self.tokens.remove(tk_loc);
         self.dice -= c_cost;
-        Ok(Action::BuyGrowth(self.p_num,bkey,tk_key))
+        Ok(Action::BuyGrowth(self.p_num,bcard,tk_key))
 
     }
 

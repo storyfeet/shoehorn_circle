@@ -1,10 +1,11 @@
 use std::str::FromStr;
 
-use lazyf::{SGetter,Lz};
+use lazyf::{SGetter,Lz,LzList,LzErr};
 
 use self::CardType::*;
 use bracket_parse::Bracket;
 use sc_error::ScErr;
+use std::collections::HashMap;
 
 
 #[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
@@ -22,6 +23,18 @@ impl CardKey{
         }
     }
 
+    pub fn from_lz(lz:&Lz)->Result<CardKey,ScErr>{
+        let kind = match lz.get_t::<CardType>("tp"){
+            Ok(k)=>k,
+            Err(LzErr::NoParse(_))=>return Err(ScErr::NoKind),
+            _=>return Err(ScErr::NotFound),
+        };
+        Ok(CardKey{
+            name:lz.name.clone(),
+            kind:kind,
+        });
+    }
+
     pub fn from_bracket(b:&Bracket)->Result<CardKey,ScErr>{
         match b {
             Bracket::Branch(v)=>{
@@ -36,30 +49,7 @@ impl CardKey{
     }
 }
 
-impl<'a> From<&'a Card> for CardKey{
-    fn from(c:&Card)->CardKey{
-        CardKey::new(&c.name,c.kind)
-    }
-}
 
-
-impl PartialEq<Card>for CardKey{
-    /// ```
-    /// use shoehorn_circle::card::{Card,CardKey,CardType};
-    /// let c = Card::new("Pig","some text",CardType::Role,2);
-    /// let ck = CardKey::new("Pig",CardType::Role);
-    /// assert_eq!(ck,c);
-    /// assert_eq!(c,ck);
-    /// ```
-    fn eq(&self,c:&Card)->bool{
-        self.name == c.name && self.kind == c.kind
-    }
-}
-impl PartialEq<CardKey>for Card{
-    fn eq(&self,c:&CardKey)->bool{
-        self.name == c.name && self.kind == c.kind
-    }
-}
 
 
 #[derive(Clone,Copy,Debug,PartialEq,Serialize,Deserialize)]//,EnumFromStr)]
@@ -73,7 +63,7 @@ pub enum CardType{
 }
 
 impl FromStr for CardType{
-    type Err = String;
+    type Err = ScErr;
     fn from_str(s:&str)->Result<Self,Self::Err>{
         match &s.to_lowercase() as &str{
             "goal"=>Ok(Goal),
@@ -82,37 +72,38 @@ impl FromStr for CardType{
             "skill"=>Ok(Skill),
             "event"=>Ok(Event),
             "scenario"=>Ok(Scenario),
-            r=>Err(format!("Not a Card Type : {}",r)),
+            r=>Err(ScErr::NoKind(r.to_string())),
         }
     }
 }
+
+
+pub fn load_data<F:AsRef<Path>>(fname:F)->Result<HashMap<CardKey,CardData>,ScErr>{
+    let lst = LzList::load(fname)?;
+    data_from_lzlist(&lst)
+}
+
+pub fn data_from_lzlist(dt:&LzList)->Result<HashMap<CardKey,CardData>,ScErr>{
+    let mut res = HashMap::new();
+    for d in dt {
+        res.insert(CardKey::from_lz(d)?,CardData::from_lz(d)?);
+    }
+    Ok(res)
+}
+
 
 #[derive(Clone,Debug,PartialEq)]
-pub struct Card{
-    pub name:String,
+pub struct CardData{
     pub text:String,
-    pub kind:CardType,
     pub cost:u8,
+    pub count:u8,
 }
 
-impl Card{
-    pub fn new(name:&str,tx:&str,kind:CardType,cost:u8)->Card{
-        Card{
-            name:name.to_string(),
-            text:tx.to_string(),
-            kind:kind,
-            cost:cost,
-        }
-    }
-    pub fn from_lz(lz:&Lz)->Result<Card,String>{
-        let kind = match lz.get_t::<CardType>("tp"){
-            Some(k)=>k,
-            None=>return Err("Kind not found".to_string()),
-        };
-        Ok(Card{
-            name:lz.name.clone(),
+impl CardData{
+    pub fn from_lz(lz:&Lz)->Result<CardData,ScErr>{
+        Ok(CardData{
+            count:lz.get_t_def("ext0",1),
             text:lz.get_s_def("tx",""),
-            kind:kind,
             cost:lz.get_t_def("Cost",4),
         })
     }

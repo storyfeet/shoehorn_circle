@@ -1,6 +1,7 @@
 use std::fmt::{Display,Formatter};
 use std::num::ParseIntError;
 use std::fmt;
+use lazyf::LzErr;
 
 
 
@@ -11,9 +12,11 @@ pub enum ScErr{
     NotFound(String),
     OtherErr(String),
     NotGm(String),
+    NoKind,
     NoDice,
     NoToken,
     NoCards,
+    Lz(LzErr),
 }
 
 impl From<String> for ScErr {
@@ -25,6 +28,12 @@ impl From<String> for ScErr {
 impl From<ParseIntError> for ScErr{
     fn from(e:ParseIntError)->ScErr{
         ScErr::NoParse(format!("{:?}",e))
+    }
+}
+
+impl From<LzErr> for ScErr{
+    fn from(e:LzErr)->Self{
+        ScErr::Lz(e)
     }
 }
 
@@ -47,3 +56,4 @@ impl Display for ScErr{
         write!(f,"{:?}",self)
     }
 }
+

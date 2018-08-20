@@ -6,7 +6,7 @@ authors = ["storyfeet <thebeaky@psmail.net>"]
 [dependencies]
 
 card_deck={path="../../mlibs/card_deck"}
-lazyf="*"
+lazyf={path="../../mlibs/lazyf"}
 rand = "*"
 enum_derive="*"
 #custom_derive="*"
