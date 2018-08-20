@@ -8,13 +8,13 @@ use action::{Action};
 
 #[derive(PartialEq,Debug)]
 pub struct Supply{
-    pub goals:Deck<Card>,
-    pub roles:Deck<Card>,
-    pub traits:Deck<Card>, 
-    pub skills:Deck<Card>,
-    pub events:Deck<Card>,
-    pub scenarios:Deck<Card>,
-    pub growth:Vec<Card>,
+    pub goals:Deck<CardKey>,
+    pub roles:Deck<CardKey>,
+    pub traits:Deck<CardKey>, 
+    pub skills:Deck<CardKey>,
+    pub events:Deck<CardKey>,
+    pub scenarios:Deck<CardKey>,
+    pub growth:Vec<CardKey>,
 }
 
 
