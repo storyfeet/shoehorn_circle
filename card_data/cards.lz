@@ -496,10 +496,3 @@ Trickster
     tp:Trait
     tx:To lead people on, to make traps. To get what you want by deception. To test your wits. This is a way of life, and one you love. 
 
-You Dun It
-	tp:Whodunit
-	tx:It was you. You done it. Try to hide it if you like, but you know you did it. Why did you done it? How?
-
-Not You:6
-	tp:Whodunit
-	tx:It wasn't you, It could be any of the other players or someone else. You'll have to work it out.

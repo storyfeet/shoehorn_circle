@@ -10,12 +10,15 @@ extern crate serde_json;
 
 use rand::{Rng,thread_rng};
 use std::cmp::min;
+use std::sync::Arc;
 
 pub mod supply;
 use supply::{Supply};
 
 pub mod card;
 //use card::CardKey;
+pub mod card_set;
+use card_set::CardSet;
 
 pub mod player;
 use player::{Player};

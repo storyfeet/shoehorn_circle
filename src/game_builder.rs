@@ -1,6 +1,5 @@
-use ::{Game,Supply,Player,Action,ScErr};
-
-use std::path::Path;
+use ::{Game,Supply,Player,Action,ScErr,CardSet};
+use std::sync::Arc;
 
 
 
@@ -9,7 +8,6 @@ pub struct GameBuilder{
     g_row_size:usize,
     player_names:Option<Vec<String>>,
     supply:Option<Supply>,
-    err:Option<ScErr>,
 }
 
 impl GameBuilder{
@@ -19,18 +17,9 @@ impl GameBuilder{
             nplayers:4,
             player_names:None,
             supply:None,
-            err:None,
         }
     }
 
-
-    pub fn supply_file<P:AsRef<Path>>(mut self,fname:P)->Self{
-        match Supply::load(fname){
-            Ok(s)=>self.supply = Some(s),
-            Err(e)=>self.err= Some(e),
-        }
-        self
-    }
 
     pub fn supply(mut self,sp:Supply)->Self{
         self.supply=Some(sp);
@@ -49,19 +38,12 @@ impl GameBuilder{
     }
 
     pub fn done(self)->Result<Game,ScErr>{
-        if let Some(e)= self.err {
-            return Err(e);
-        }
         let pnames:Vec<String> = match self.player_names{
             Some(n)=>n,
             None=> (0..self.nplayers).map(|i|format!("P{}",i)).collect(),
         };
 
-        let mut supply = match self.supply{
-            Some(sp)=>sp,
-            None=>Supply::load("card_data/cards.lz")?,
-        };
-        supply.shuffle_decks();
+        let mut supply = self.supply.ok_or(ScErr::NoSupply)?;
 
         let mut actions = supply.setup_growth(self.g_row_size);
 
@@ -72,7 +54,6 @@ impl GameBuilder{
             players.push(p);
         }
 
-
         Ok( Game{
             players:players,
             actions:actions,
@@ -81,20 +62,10 @@ impl GameBuilder{
     }
 
     pub fn done_history(self,v:Vec<Action>)->Result<Game,ScErr>{
-        if let Some(e)= self.err {
-            return Err(e);
-        }
-
-        let mut supply = match self.supply{
-            Some(sp)=>sp,
-            None=>Supply::load("card_data/cards.lz")?,
-        };
-        supply.shuffle_decks();
-
         let mut res = Game{
             players:Vec::new(),
             actions:Vec::new(),
-            supply:supply,
+            supply:self.supply.ok_or(ScErr::NoSupply)?,
         };
         res.run_actions(v)?;
         Ok(res)

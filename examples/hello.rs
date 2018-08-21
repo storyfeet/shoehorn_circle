@@ -1,21 +1,23 @@
 extern crate shoehorn_circle as shoehorn;
 extern crate bracket_parse;
-use shoehorn::{Game,ScErr};
+use shoehorn::{Game,ScErr,card_set};
 use shoehorn::card::{CardType,CardKey};
 use shoehorn::action::{Action,Request};
-//use shoehorn::supply::Supply;
+use shoehorn::supply::Supply;
 //use shoehorn::player::Player;
 
 use bracket_parse::Bracket;
 
 use std::io;
 use std::str::FromStr;
+use std::sync::Arc;
 
 
 
-fn setup()->Result<Game,ScErr>{
+fn setup(c_set:Arc<card_set::CardSet>)->Result<Game,ScErr>{
 
-    let mut gm = Game::build().supply_file("card_data/cards.lz").player_names(vec!["Matt".to_string(),"Toby".to_string()]).done()?;
+    let sp = Supply::from_map(c_set);
+    let mut gm = Game::build().supply(sp).player_names(vec!["Matt".to_string(),"Toby".to_string()]).done()?;
 
 
     let stdin = io::stdin();
@@ -31,7 +33,7 @@ fn setup()->Result<Game,ScErr>{
             let mut s = String::new();
             stdin.read_line(&mut s).expect("Could not read Line");
             for c in &p.cards {
-                println!("  {}:{:?}:{}",c.name,c.kind,c.text);
+                println!("  {}:{:?}",c.name,c.kind);
             }
 
             let ctypes = vec![CardType::Goal,CardType::Role,CardType::Trait,CardType::Skill];
@@ -45,7 +47,7 @@ fn setup()->Result<Game,ScErr>{
                     for (i,a) in p.cards.iter()
                                 .filter(|c| c.kind == t).enumerate(){
                         println!("   {}:{}",i,a.name);
-                        keys.push(a.into());
+                        keys.push(a.clone());
                     }
 
                     if keys.len() < 2 { continue}
@@ -71,7 +73,7 @@ fn setup()->Result<Game,ScErr>{
 
         println!("Keeping:");
         for c in &gm.get_players()[i].cards {
-            println!("  {:?}::{}:{}",c.kind,c.name,c.text);
+            println!("  {:?}::{}",c.kind,c.name);
         }
 
     }//for i in players.len
@@ -107,7 +109,7 @@ pub fn do_bracket(b:Bracket,gm:&mut Game)->Result<Job,ScErr>{
                     }
                     "player"=>{
                         let fs =  b.tail_h(2).string_val();
-                        let p = gm.get_players().iter().find(|p|p.name == fs).ok_or(ScErr::NotFound(fs))?;
+                        let p = gm.get_players().iter().find(|p|p.name == fs).ok_or(ScErr::NotFound)?;
                         println!("{}:{} -- d:{} -- t:{}",p.name,p.role(),p.dice,p.tokens.len());
                         println!("Tokens   {:?}",p.tokens);
                         for c in &p.cards {
@@ -134,7 +136,8 @@ pub fn do_bracket(b:Bracket,gm:&mut Game)->Result<Job,ScErr>{
 
 
 fn main(){
-    let mut gm = setup().unwrap();
+    let c_set = Arc::new(card_set::load("card_data/cards.lz").unwrap());
+    let mut gm = setup(c_set).unwrap();
     let stdin = io::stdin();
 
     loop {

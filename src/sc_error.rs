@@ -9,13 +9,15 @@ use lazyf::LzErr;
 pub enum ScErr{
     NoLoad(String),
     NoParse(String),
-    NotFound(String),
+    NotFoundS(String),
+    NotFound,
     OtherErr(String),
     NotGm(String),
-    NoKind,
+    NoKind(String),
     NoDice,
     NoToken,
     NoCards,
+    NoSupply,
     Lz(LzErr),
 }
 
@@ -43,7 +45,7 @@ impl ScErr{
         ScErr::NoLoad(s.to_string())
     }
     pub fn not_found(s:&str)->ScErr{
-        ScErr::NotFound(s.to_string())
+        ScErr::NotFoundS(s.to_string())
     }
     pub fn not_gm(s:&str)->ScErr{
         ScErr::NotGm(s.to_string())

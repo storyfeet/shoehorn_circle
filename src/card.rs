@@ -1,14 +1,13 @@
 use std::str::FromStr;
 
-use lazyf::{SGetter,Lz,LzList,LzErr};
+use lazyf::{SGetter,Lz};
 
 use self::CardType::*;
 use bracket_parse::Bracket;
 use sc_error::ScErr;
-use std::collections::HashMap;
 
 
-#[derive(Debug,PartialEq,Clone,Serialize,Deserialize)]
+#[derive(Debug,PartialEq,Eq,Hash,Clone,Serialize,Deserialize)]
 pub struct CardKey{//primary key
     pub name:String,
     pub kind:CardType,
@@ -24,15 +23,14 @@ impl CardKey{
     }
 
     pub fn from_lz(lz:&Lz)->Result<CardKey,ScErr>{
-        let kind = match lz.get_t::<CardType>("tp"){
-            Ok(k)=>k,
-            Err(LzErr::NoParse(_))=>return Err(ScErr::NoKind),
-            _=>return Err(ScErr::NotFound),
-        };
+        let kind:CardType = lz.get_s("tp")
+                    .ok_or(ScErr::NotFound)?
+                    .parse()?;
+
         Ok(CardKey{
             name:lz.name.clone(),
             kind:kind,
-        });
+        })
     }
 
     pub fn from_bracket(b:&Bracket)->Result<CardKey,ScErr>{
@@ -52,7 +50,7 @@ impl CardKey{
 
 
 
-#[derive(Clone,Copy,Debug,PartialEq,Serialize,Deserialize)]//,EnumFromStr)]
+#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash,Serialize,Deserialize)]//,EnumFromStr)]
 pub enum CardType{
     Goal,
     Role,
@@ -72,40 +70,12 @@ impl FromStr for CardType{
             "skill"=>Ok(Skill),
             "event"=>Ok(Event),
             "scenario"=>Ok(Scenario),
-            r=>Err(ScErr::NoKind(r.to_string())),
+            _=>Err(ScErr::NoKind(s.to_string())),
         }
     }
 }
 
 
-pub fn load_data<F:AsRef<Path>>(fname:F)->Result<HashMap<CardKey,CardData>,ScErr>{
-    let lst = LzList::load(fname)?;
-    data_from_lzlist(&lst)
-}
-
-pub fn data_from_lzlist(dt:&LzList)->Result<HashMap<CardKey,CardData>,ScErr>{
-    let mut res = HashMap::new();
-    for d in dt {
-        res.insert(CardKey::from_lz(d)?,CardData::from_lz(d)?);
-    }
-    Ok(res)
-}
 
 
-#[derive(Clone,Debug,PartialEq)]
-pub struct CardData{
-    pub text:String,
-    pub cost:u8,
-    pub count:u8,
-}
-
-impl CardData{
-    pub fn from_lz(lz:&Lz)->Result<CardData,ScErr>{
-        Ok(CardData{
-            count:lz.get_t_def("ext0",1),
-            text:lz.get_s_def("tx",""),
-            cost:lz.get_t_def("Cost",4),
-        })
-    }
-}
 
