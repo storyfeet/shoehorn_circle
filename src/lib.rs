@@ -43,8 +43,8 @@ pub struct Game{
 }
 
 impl Game{
-    pub fn build()->GameBuilder{
-        GameBuilder::new()
+    pub fn build(sp:Supply)->GameBuilder{
+        GameBuilder::new(sp)
     }
 
     pub fn player_num(&self, name:&str)->Option<usize>{

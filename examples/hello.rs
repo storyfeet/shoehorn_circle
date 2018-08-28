@@ -17,7 +17,7 @@ use std::sync::Arc;
 fn setup(c_set:Arc<card_set::CardSet>)->Result<Game,ScErr>{
 
     let sp = Supply::from_map(c_set);
-    let mut gm = Game::build().supply(sp).player_names(vec!["Matt".to_string(),"Toby".to_string()]).done()?;
+    let mut gm = Game::build(sp).player_names(vec!["Matt".to_string(),"Toby".to_string()]).done()?;
 
 
     let stdin = io::stdin();
