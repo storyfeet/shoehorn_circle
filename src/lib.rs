@@ -10,7 +10,6 @@ extern crate serde_json;
 
 use rand::{Rng,thread_rng};
 use std::cmp::min;
-use std::sync::Arc;
 
 pub mod supply;
 use supply::{Supply};
@@ -18,13 +17,13 @@ use supply::{Supply};
 pub mod card;
 //use card::CardKey;
 pub mod card_set;
-use card_set::CardSet;
+pub use card_set::CardSet;
 
 pub mod player;
 use player::{Player};
 
 pub mod action;
-use action::{Action,Request,RequestType};
+pub use action::{Action,Request,RequestType};
 
 pub mod sc_error;
 pub use sc_error::ScErr;
@@ -109,6 +108,9 @@ impl Game{
 
                 self.actions.push(rw_ac);
                 
+            }
+            DropCard(ckey)=>{
+                self.run_action(Action::DropCard(pnum,ckey))?;
             }
         };
         Ok(())

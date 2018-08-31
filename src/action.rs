@@ -52,6 +52,7 @@ pub enum RequestType{
     WhoDunnit(String),//Text for what they done
     Reward(String,CardKey,u8),//Player, Card, dice
     BuyGrowth(CardKey,CardKey),//Buy what, token from
+    DropCard(CardKey)
 }
 
 impl Request{

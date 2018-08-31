@@ -3,7 +3,6 @@ use card_deck::Deck;
 use card_set::CardSet;
 use sc_error::ScErr;
 use action::{Action};
-use std::collections::HashMap;
 use std::sync::Arc;
 
 
@@ -22,7 +21,7 @@ pub struct Supply{
 
 impl Supply {
     //creates an empty supply
-    pub fn new(cs:Arc<CardSet>)->Self{
+    fn empty(cs:Arc<CardSet>)->Self{
         Supply{
             goals:Deck::build().done(), 
             roles:Deck::build().done(), 
@@ -37,7 +36,7 @@ impl Supply {
 
 
     pub fn from_map(mp:Arc<CardSet>)->Supply{
-        let mut res = Self::new(mp.clone()); 
+        let mut res = Self::empty(mp.clone()); 
         for (k,_) in mp.iter() {
             res.deck_by_type(k.kind).push_bottom(k.clone());
         }
