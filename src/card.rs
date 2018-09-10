@@ -5,6 +5,7 @@ use lazyf::{SGetter,Lz};
 use self::CardType::*;
 use bracket_parse::Bracket;
 use sc_error::ScErr;
+use std::fmt;
 
 
 #[derive(Debug,PartialEq,Eq,Hash,Clone,Serialize,Deserialize)]
@@ -13,6 +14,11 @@ pub struct CardKey{//primary key
     pub kind:CardType,
 }
 
+impl fmt::Display for CardKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{:?}", self.name, self.kind)
+    }
+}
 
 impl CardKey{
     pub fn new(nm:&str,kind:CardType)->CardKey{
@@ -58,6 +64,21 @@ pub enum CardType{
     Skill,
     Event,
     Scenario,
+}
+
+
+impl FromStr for CardKey{
+    type Err = ScErr;
+    fn from_str(s:&str)->Result<Self,ScErr>{
+        let mut sp = s.split(',');
+        let nm = sp.next().expect("Split returned len 0");
+        let kn = sp.next().ok_or(ScErr::NoParse("no comma".to_string()))?;
+
+        Ok(CardKey{
+            name:nm.to_string(),
+            kind:kn.parse()?,
+        })
+    }
 }
 
 impl FromStr for CardType{

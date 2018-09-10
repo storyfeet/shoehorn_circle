@@ -3,6 +3,7 @@ extern crate lazyf;
 extern crate itertools;
 extern crate bracket_parse;
 extern crate rand;
+extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 //#[macro_use] extern crate macro_attr;
