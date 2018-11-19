@@ -108,7 +108,7 @@ impl Game{
                 let rw_ac = self.players[r_pnum].reward(ckey,ndice);
 
                 self.actions.push(rw_ac);
-                
+
             }
             DropCard(ckey)=>{
                 self.run_action(Action::DropCard(pnum,ckey))?;
@@ -148,7 +148,7 @@ impl Game{
                 while let Some(ac) = it.next_back(){
                     if let Bid(n,d) = ac {
                         if *n == w {
-                            self.players[w].dice -= 
+                            self.players[w].dice -=
                                 std::cmp::min(self.players[w].dice,
                                                 *d);
                             break;
@@ -161,9 +161,9 @@ impl Game{
         self.actions.push(a);
         Ok(())
     }
-    
 
-    pub fn run_actions<A:IntoIterator<Item=Action>>(&mut self,ac_list:A)->Result<(),ScErr>{
+
+    fn run_actions<A:IntoIterator<Item=Action>>(&mut self,ac_list:A)->Result<(),ScErr>{
         for a in ac_list {
             self.run_action(a)?;
         }
@@ -171,15 +171,15 @@ impl Game{
     }
 
 
-    fn roll_bids(&mut self){ 
+    fn roll_bids(&mut self){
         let mut bids:Vec<Option<u8>> = Vec::new();
         for _ in 0..self.players.len(){
             bids.push(None);
         }
-        
+
         { //borrow for iterator
             let mut ac_it = (&self.actions).into_iter();
-            while let Some(ac)=  ac_it.next_back(){ 
+            while let Some(ac)=  ac_it.next_back(){
                 match ac {
                     Action::Bid(p_ref,n)=>{
                         if bids[*p_ref] == None{
@@ -215,10 +215,10 @@ impl Game{
                     }
                     _=>return,
                 }//match
-            }//for 
+            }//for
         } //tie
         let maxp = maxp.unwrap(); //only left the loop if Some
-        
+
         self.players[maxp].dice -= bids[maxp].unwrap();
         self.actions.push(Action::Roll(rolls));
     }
@@ -259,7 +259,7 @@ mod test{
     use action::Action::*;
     use card::{CardKey,CardType};
     use std::str::FromStr;
-    
+
     //test util
     fn pname(n:usize)->String{
         format!("P{}",n)
@@ -318,11 +318,11 @@ mod test{
         assert_eq!( gm2.players.len(),4 );
 
         for (i,p1) in gm.players.iter().enumerate(){
-            let p2= &gm2.players[i]; 
+            let p2= &gm2.players[i];
             assert_eq!(p1.name,p2.name);
             assert_eq!(p1.cards,p2.cards);
         }
-        
+
     }
 
 
@@ -352,15 +352,15 @@ mod test{
         assert_eq!(gm.get_players()[1].tokens[0],CardKey::new("Swordsman",CardType::Skill));
 
         gm.player_action(Request::from_str(
-                r#"toby buy ("Lock Pick" Skill) (Swordsman Skill)"# 
+                r#"toby buy ("Lock Pick" Skill) (Swordsman Skill)"#
                 ).unwrap()).unwrap();
 
         assert_eq!(gm.get_players()[1].tokens.len(), 0);
         assert_eq!(gm.get_players()[1].cards[2],CardKey::new("Lock Pick",CardType::Skill));
 
-        //test failing action 
+        //test failing action
         assert!(gm.player_action(Request::from_str(
-                r#"toby buy ("Lock Puck" Skill) (Swordsman Skill)"# 
+                r#"toby buy ("Lock Puck" Skill) (Swordsman Skill)"#
                 ).unwrap()).is_err());
     }
 
