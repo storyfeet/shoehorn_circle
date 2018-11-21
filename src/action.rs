@@ -62,24 +62,23 @@ fn _escape(s:&str)->String{
     
 }
 
+impl RequestType{
+    pub fn escape(self)->Self{
+        use self::RequestType::*;
+        match self {
+                Chat(s)=>Chat(_escape(&s)),
+                Do(s)=>Do(_escape(&s)),
+                Say(s)=>Say(_escape(&s)),
+                o=>o,
+        }
+    }
+}
+
 impl Request{
     pub fn new(nm:&str,a:RequestType)->Self{
         Request{
             player_name:nm.to_string(),
             act:a,
-        }
-    }
-
-    pub fn new_escaped(nm:&str,a:RequestType)->Self{
-        use self::RequestType::*;
-        Request{
-            player_name:nm.to_string(),
-            act:match a {
-                Chat(s)=>Chat(_escape(&s)),
-                Do(s)=>Do(_escape(&s)),
-                Say(s)=>Say(_escape(&s)),
-                o=>o,
-            }
         }
     }
 
