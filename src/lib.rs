@@ -13,24 +13,24 @@ use rand::{Rng,thread_rng};
 use std::cmp::min;
 
 pub mod supply;
-use supply::{Supply};
+use crate::supply::{Supply};
 
 pub mod card;
 //use card::CardKey;
 pub mod card_set;
-pub use card_set::CardSet;
+pub use crate::card_set::CardSet;
 
 pub mod player;
-use player::{Player};
+use crate::player::{Player};
 
 pub mod action;
-pub use action::{Action,Request,RequestType};
+pub use crate::action::{Action,Request,RequestType};
 
 pub mod sc_error;
-pub use sc_error::ScErr;
+pub use crate::sc_error::ScErr;
 
 mod game_builder;
-use game_builder::GameBuilder;
+use crate::game_builder::GameBuilder;
 
 
 
@@ -65,7 +65,7 @@ impl Game{
     }
 
     pub fn player_action(&mut self,ac:Request)->Result<(),ScErr>{
-        use RequestType::*;
+        use crate::RequestType::*;
         let pnum = self.player_num(&ac.player_name).ok_or(ScErr::not_found(&ac.player_name))?;
 
         match ac.act{
@@ -118,7 +118,7 @@ impl Game{
     }
 
     pub fn run_action(&mut self,a:Action)->Result<(),ScErr>{
-        use action::Action::*;
+        use crate::action::Action::*;
         match a {
             //Consider using get instead of index on playernum or making sure to sanitize
             //action_history

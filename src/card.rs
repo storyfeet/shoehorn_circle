@@ -1,10 +1,9 @@
+use crate::sc_error::ScErr;
+
 use std::str::FromStr;
-
 use lazyf::{SGetter,Lz};
-
 use self::CardType::*;
 use bracket_parse::Bracket;
-use sc_error::ScErr;
 use std::fmt;
 
 

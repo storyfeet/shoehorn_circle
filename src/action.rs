@@ -1,6 +1,7 @@
-use card::CardKey;
+use crate::card::CardKey;
+use crate::sc_error::ScErr;
+
 use std::str::FromStr;
-use sc_error::ScErr;
 //use itertools::Itertools;
 use bracket_parse::Bracket;
 
@@ -55,11 +56,23 @@ pub enum RequestType{
     DropCard(CardKey)
 }
 
+fn _escape(){
+}
+
 impl Request{
     pub fn new(nm:&str,a:RequestType)->Self{
         Request{
             player_name:nm.to_string(),
             act:a,
+        }
+    }
+
+    pub fn new_escaped(nm:&str,a:RequestType)->Self{
+        Request{
+            player_name:nm.to_string(),
+            act:match a {
+                o=>o,
+            }
         }
     }
 

@@ -1,7 +1,7 @@
-use card::{CardType,CardKey};// TODO Use Card DATA for buy
-use supply::{Supply};
-use action::{Action};
-use sc_error::ScErr;
+use crate::card::{CardType,CardKey};// TODO Use Card DATA for buy
+use crate::supply::{Supply};
+use crate::action::{Action};
+use crate::sc_error::ScErr;
 
 
 #[derive(Debug,Clone,PartialEq)]
