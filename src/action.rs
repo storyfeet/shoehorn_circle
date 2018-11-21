@@ -56,7 +56,10 @@ pub enum RequestType{
     DropCard(CardKey)
 }
 
-fn _escape(){
+fn _escape(s:&str)->String{
+    let es = marksman_escape::Escape::new(s.bytes());
+    String::from_utf8(es.collect()).unwrap_or("BAD HTML".to_string())
+    
 }
 
 impl Request{
@@ -68,9 +71,13 @@ impl Request{
     }
 
     pub fn new_escaped(nm:&str,a:RequestType)->Self{
+        use self::RequestType::*;
         Request{
             player_name:nm.to_string(),
             act:match a {
+                Chat(s)=>Chat(_escape(&s)),
+                Do(s)=>Do(_escape(&s)),
+                Say(s)=>Say(_escape(&s)),
                 o=>o,
             }
         }
